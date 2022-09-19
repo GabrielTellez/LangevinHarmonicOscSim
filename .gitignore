@@ -6,4 +6,5 @@ seminario_termo_estocastica*.ipynb
 .ipynb_checkpoints/
 *Copy*
 *-bk*
+__pycache__/
 
