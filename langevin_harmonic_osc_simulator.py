@@ -20,8 +20,8 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
       noise_scaler (float, optional): brownian noise scale k_B T. Defaults to 1.0.
       snapshot_step (int, optional): save a snapshot of simulation at
       each snapshot_step time. Defaults to 100.
-      k (float, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
-      center (float, optional): center function of the potential. Defaults to center(t)=0.0.
+      k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
+      center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
 
   Returns:
       njitted function: numba compiled function that performs simulation 
@@ -137,8 +137,8 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
       show_x_eq_distrib (bool, optional): show the equilibrium
         distribution corresponding to a harmonic oscilator with center(t)
         and stiffness k(t). Defaults to True.
-      k (float, optional): stiffness function of the potential. Defaults to k(t)=1.0.
-      center (float, optional): center function of the potential. Defaults to center(t)=0.0.
+      k (float function, optional): stiffness function of the potential. Defaults to k(t)=1.0.
+      center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
 
   Returns:
       Plotly graphics object: animation of the simulation data
