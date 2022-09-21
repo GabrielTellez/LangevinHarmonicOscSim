@@ -32,6 +32,21 @@ Returns:
 
 njitted function: numba compiled function that performs simulation
 
+Example:
+
+    # creates a simulator with functions k_function(t) for the stiffness and center_function(t) for the center
+    simulator = make_simulator(tot_sims=1000000, dt=0.00001, tot_steps=10000, k=k_function, center=center_function)
+    # runs the simulator
+    times, x, power, work, heat, delta_U, energy = simulator()
+    """ Returns:
+        times, x, power, work, heat, delta_U, energy: 
+          times: list of times of the snapshots
+          x, power, work, heat, delta_U, energy = list of positions,
+          power, ..., snapshots for each simulation
+          ie. x[sim] = [x(0), x(snapshot_step*dt), x(2*snapshot_step*dt), .... ] for simulation number sim.
+    """
+
+
 ### animate_simulation
 
 animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=k, center=center):
