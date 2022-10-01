@@ -80,4 +80,32 @@ def test_no_evolution():
     assert np.average(delta_U[:,time_index]) == approx(0.0, rel=tol, abs=tol), f"energy should not change on average. Error on time_index={time_index}"
     assert np.average(energy[:, time_index]) == approx (0.5, rel=2.0*tol), f"on average energy should be (1/2) k_B T. Error on time_index={time_index}"
 
-   
+def test_energy_conservation_fixed_potential():
+  # test with fixed potential
+  def k1(t):
+    return 1.0
+  def center1(t):
+    return 0.0
+  tot_sims=10
+  tot_steps=10000
+  snapshot_step=100
+  simulator = make_simulator(tot_sims=tot_sims, dt=0.00001, tot_steps=tot_steps, snapshot_step=snapshot_step, k=k1, center=center1)
+  times, x, power, work, heat, delta_U, energy = simulator()
+  for time_index in range(0, len(times)):
+    assert delta_U[:, time_index] - (work[:, time_index] + heat[:, time_index]) == approx(0.0)
+    assert delta_U[:, time_index] - (energy[:, time_index] - energy[:, 0]) == approx(0.0)
+
+def test_energy_conservation_variable_potential():
+  # test with moving center and k linear
+  def k2(t):
+    return 1.0+0.1*t
+  def center2(t):
+    return 0.2*t
+  tot_sims=10
+  tot_steps=10000
+  snapshot_step=100
+  simulator = make_simulator(tot_sims=tot_sims, dt=0.00001, tot_steps=tot_steps, snapshot_step=snapshot_step, k=k2, center=center2)
+  times, x, power, work, heat, delta_U, energy = simulator()
+  for time_index in range(0, len(times)):
+    assert delta_U[:, time_index] - (work[:, time_index] + heat[:, time_index]) == approx(0.0)
+    assert delta_U[:, time_index] - (energy[:, time_index] - energy[:, 0]) == approx(0.0)
