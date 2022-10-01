@@ -57,7 +57,7 @@ def test_no_evolution():
     """Equilibrium distribution"""
     return np.exp(-0.5*k1(0.0)*(x-center1(0.0))**2)/np.sqrt(2*np.pi/k1(0.0))
 
-  tot_sims=1000000
+  tot_sims=100000
   tot_steps=10000
   snapshot_step=100
   simulator = make_simulator(tot_sims=tot_sims, dt=0.00001, tot_steps=tot_steps, snapshot_step=snapshot_step, k=k1, center=center1)
@@ -71,13 +71,13 @@ def test_no_evolution():
   tol = 1.0/np.sqrt(tot_sims)
   for time_index in range(0, len(times)):
     err = np.square(histos[time_index][0]-Peq_array).mean()
-    assert err < 0.1/np.sqrt(tot_sims) , "P(x) should be the equilibrium distribution at all times"
-    assert work[:,time_index] == approx(0.0), "No work if the potential does not change"
-    assert power[:,time_index] == approx(0.0), "No power if the potential does not change"
+    assert err < 0.1/np.sqrt(tot_sims) , f"P(x) should be the equilibrium distribution at all times. Error on time_index={time_index}"
+    assert work[:,time_index] == approx(0.0), f"No work if the potential does not change. Error on time_index={time_index}"
+    assert power[:,time_index] == approx(0.0), f"No power if the potential does not change. Error on time_index={time_index}"
     if time_index > 0:
-      assert not heat[:,time_index] == approx(0.0), "heat is not zero for each realization"
-    assert np.average(heat[:,time_index]) == approx(0.0, rel=tol, abs=tol), "heat should be zero on average"
-    assert np.average(delta_U[:,time_index]) == approx(0.0, rel=tol, abs=tol), "energy should not change on average"
-    assert np.average(energy[:, time_index]) == approx (0.5, rel=2.0*tol), "on average energy should be (1/2) k_B T"
+      assert not heat[:,time_index] == approx(0.0), f"heat is not zero for each realization. Error on time_index={time_index}"
+    assert np.average(heat[:,time_index]) == approx(0.0, rel=tol, abs=tol), f"heat should be zero on average. Error on time_index={time_index}"
+    assert np.average(delta_U[:,time_index]) == approx(0.0, rel=tol, abs=tol), f"energy should not change on average. Error on time_index={time_index}"
+    assert np.average(energy[:, time_index]) == approx (0.5, rel=2.0*tol), f"on average energy should be (1/2) k_B T. Error on time_index={time_index}"
 
    
