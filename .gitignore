@@ -7,4 +7,6 @@ seminario_termo_estocastica*.ipynb
 *Copy*
 *-bk*
 __pycache__/
+.vscode/
+
 
