@@ -39,13 +39,12 @@ Example:
     # runs the simulator
     times, x, power, work, heat, delta_U, energy = simulator()
     """ Returns:
-        times, x, power, work, heat, delta_U, energy: 
+        times, x, power, work, heat, delta_U, energy:
           times: list of times of the snapshots
           x, power, work, heat, delta_U, energy = list of positions,
           power, ..., snapshots for each simulation
           ie. x[sim] = [x(0), x(snapshot_step*dt), x(2*snapshot_step*dt), .... ] for simulation number sim.
     """
-
 
 ### animate_simulation
 
@@ -75,6 +74,10 @@ Plotly graphics object: animation of the simulation data
 ## "test-mylibrary.ipynb"
 
 Jupyter notebook illustrating the use of the simulation library.
+
+## tests/
+
+Tests for use with pytest for the simulator
 
 ## scripts/
 

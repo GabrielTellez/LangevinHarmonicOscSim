@@ -58,7 +58,7 @@ def test_no_evolution():
     return np.exp(-0.5*k1(0.0)*(x-center1(0.0))**2)/np.sqrt(2*np.pi/k1(0.0))
 
   tot_sims=100000
-  tot_steps=10000
+  tot_steps=1000
   snapshot_step=100
   simulator = make_simulator(tot_sims=tot_sims, dt=0.00001, tot_steps=tot_steps, snapshot_step=snapshot_step, k=k1, center=center1)
   times, x, power, work, heat, delta_U, energy = simulator()
@@ -78,7 +78,8 @@ def test_no_evolution():
       assert not heat[:,time_index] == approx(0.0), f"heat is not zero for each realization. Error on time_index={time_index}"
     assert np.average(heat[:,time_index]) == approx(0.0, rel=tol, abs=tol), f"heat should be zero on average. Error on time_index={time_index}"
     assert np.average(delta_U[:,time_index]) == approx(0.0, rel=tol, abs=tol), f"energy should not change on average. Error on time_index={time_index}"
-    assert np.average(energy[:, time_index]) == approx (0.5, rel=2.0*tol), f"on average energy should be (1/2) k_B T. Error on time_index={time_index}"
+    # test energy with a confidence interval of 1-1E-6, thus the factor 4.75 
+    assert np.average(energy[:, time_index]) == approx (0.5, rel=4.75*tol), f"on average energy should be (1/2) k_B T. Error on time_index={time_index}"
 
 def test_energy_conservation_fixed_potential():
   # test with fixed potential
