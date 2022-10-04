@@ -227,12 +227,13 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
   fig.update_layout(bargap=0)
   return fig
 
+
 class Simulation:
   """Stores simulation parameters and results. 
   Analyses the results: builds PDF of the simulation results (position,
   work, etc..)
   """
-  result_labels = ["times", "x", "power", "work", "heat", "delta_U", "energy"]
+  result_labels = ["x", "power", "work", "heat", "delta_U", "energy"]
   def __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results):
     """Initializes the Simulation class with parameters and raw results
 
@@ -278,7 +279,46 @@ class Simulation:
       'delta_U': delta_U,
       'energy': energy
     }
+    self.histogram = {}
+    self.pdf = {}
 
+  def build_histogram(self, quantity, bins = 300, q_range = (-3.0, 3.0)):
+    """Builds the histogram of a quantity
+
+    Args:
+        quantity (string): quantity to build its histogram. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+        bins (int, optional): bins for the histogram. Defaults to 300.
+        q_range (list, optional): range for the quantity. Defaults to [-3.0, 3.0].
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    self.histogram[quantity]=np.array([np.histogram(self.results[quantity][:,ti], density=True, range=q_range, bins=bins) for ti in range(0,len(self.results["times"]))], dtype=object)
+ 
+  def build_pdf(self, quantity):
+    """Builds the probability density function for a quantity
+
+    Args:
+        quantity (string): quantity to build its pdf. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    if quantity not in self.histogram.keys():
+      # Build the histogram if not previously build
+      self.build_histogram(quantity)
+    def pdf(x, t):
+      # time t to snapshot index ti
+      ti = int(t/self.snapshot_step)
+      # self.histogram[quantity][ti, 0] # contains P(x)
+      # self.histogram[quantity][ti, 1] # contains x
+      # get the index corresponding to value x in the bins
+      bins_x = self.histogram[quantity][ti, 1]
+      if x < np.min(bins_x) or x > np.max(bins_x):
+        return 0.0
+      index_x = np.digitize(x, bins_x) - 1
+      if index_x < 0: 
+        index_x=0
+      return self.histogram[quantity][ti, 0][index_x]
+    self.pdf[quantity] = pdf    
 
 class Simulator:
   """Simulator class for Langevin dynamics of a harmonic oscillator with

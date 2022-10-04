@@ -33,6 +33,40 @@ def dummy_sim():
     sim
   )
 
+@pytest.fixture
+def dummy_sim_const_histo():
+  """Builds a dummy simulation with results yielding a constant
+  histogram by segments
+  """
+  def k(t):
+    """t |--> 1.0 """
+    return 1.0
+  def center(t):
+    """t |--> 0.0"""
+    return 0.0
+  tot_sims = 10
+  dt = 1.0
+  tot_steps = 100
+  snapshot_step = 101
+  noise_scaler = 1.0
+  tot_snapshots = int(tot_steps/snapshot_step)+1
+  x = np.array([[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+  x = x.transpose()
+  work = x
+  power = x
+  heat = x 
+  delta_U = x 
+  energy = x  
+  times=np.arange(0, (1+tot_steps)*dt, dt*snapshot_step)
+  results = (times, x, power, work, heat, delta_U, energy)
+  sim = Simulation(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center, results=results)
+  return (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  )
+
+
 def test_simulation_init(dummy_sim):
   """Tests correct creation of a simulation class and store of parameters
   """
@@ -58,17 +92,15 @@ def test_simulation_init_store_results(dummy_sim):
     sim
   ) = dummy_sim
   (times, x, power, work, heat, delta_U, energy) = results
-  labels = ["times", "x", "power", "work", "heat", "delta_U", "energy"]
+  labels = ["x", "power", "work", "heat", "delta_U", "energy"]
   assert sim.result_labels == labels
-  assert (sim.results['times'] - times).all() == 0
-  assert (sim.results['x'] - x).all() == 0
-  assert (sim.results['power'] - power).all() == 0
-  assert (sim.results['work'] - work).all() == 0
-  assert (sim.results['heat'] - heat).all() == 0
-  assert (sim.results['delta_U'] - delta_U).all() == 0
-  assert (sim.results['energy'] - energy).all() == 0
-
-
+  assert np.array_equal(sim.results['times'], times) 
+  assert np.array_equal(sim.results['x'], x)
+  assert np.array_equal(sim.results['power'], power)
+  assert np.array_equal(sim.results['work'], work)
+  assert np.array_equal(sim.results['heat'], heat)
+  assert np.array_equal(sim.results['delta_U'], delta_U)
+  assert np.array_equal(sim.results['energy'], energy)
 
 def test_simulation_results_shape(dummy_sim):
   """Tests if the results have the correct shape
@@ -95,3 +127,80 @@ def test_simulation_results_shape(dummy_sim):
   assert np.shape(sim_res['heat']) == shape
   assert np.shape(sim_res['delta_U']) == shape
   assert np.shape(sim_res['energy']) == shape
+
+
+@pytest.mark.parametrize("quantity",
+                        ["x", "power", "work", "heat", "delta_U", "energy"])
+def test_build_histogram(dummy_sim, quantity):
+  """Tests if a histogram is build with the correct shape"""
+  np.warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  bins = 300
+  q_range = [-30, 3.0]
+  sim.build_histogram(quantity, bins = bins, q_range = q_range)
+  shape = (len(sim.results["times"]), 2)
+  assert np.shape(sim.histogram[quantity]) == shape
+
+@pytest.mark.parametrize("quantity",
+                        ["x", "power", "work", "heat", "delta_U", "energy"])
+def test_build_pdf(dummy_sim, quantity):
+  """test if the probability density functions are build correctly"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  sim.build_pdf(quantity)
+  assert callable(sim.pdf[quantity])
+
+@pytest.mark.parametrize("quantity",
+                        ["x", "power", "work", "heat", "delta_U", "energy"])
+def test_pdf_call(dummy_sim, quantity):
+  """Test a call to a probability density function"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  sim.build_pdf(quantity)
+  assert isinstance(sim.pdf[quantity](0.0, 0.0), float)
+
+def test_pdf_call(dummy_sim_const_histo):
+  """Test pdf correctly build for simple realization"""
+  # with x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+  # the PDF with 4 bins should be 
+  # P(0) = 2 / norm
+  # P(0.5) = 3 / norm
+  # P(0.8) = P(1.0) = 5 / norm
+  # with norm = 10*0.25
+  bins = 4
+  range_length = 1.0
+  norm = 10 * range_length / bins 
+  def pdf_theo(x):
+    if 0 <= x < 0.25:
+      return 2.0/norm
+    if 0.25 <= x < 0.5:
+      return 0.0
+    if 0.5 <= x < 0.75:
+      return 3/norm
+    if 0.75 <= x <= 1.0:
+      return 5/norm 
+    else:
+      return 0.0
+
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_histogram('x', bins=bins, q_range =(0.0, 1.0))
+  sim.build_pdf('x')
+  for x in np.arange(-2.0, 2.0, 0.1):
+    assert sim.pdf['x'](x,0) == pdf_theo(x)
+  
+
+  
