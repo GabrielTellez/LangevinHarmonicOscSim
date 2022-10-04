@@ -226,3 +226,107 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
   fig=go.Figure(fig_dict)
   fig.update_layout(bargap=0)
   return fig
+
+class Simulation:
+  """Stores simulation parameters and results. 
+  Analyses the results: builds PDF of the simulation results (position,
+  work, etc..)
+  """
+  result_labels = ["times", "x", "power", "work", "heat", "delta_U", "energy"]
+  def __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results):
+    """Initializes the Simulation class with parameters and raw results
+
+    Args:
+        tot_sims (int): total number of simulations.
+        dt (float): time step.
+        tot_steps (int): number of steps of each simulation.
+        noise_scaler (float): brownian noise scale k_B T. Defaults to 1.0.
+        snapshot_step (int): a snapshot of simulation has been saved each snapshot_step time.
+        k (float function): stiffness of the potential
+        center (float function): center of the potential
+        results (tuple): results in the form (times, x, power, work, heat, delta_U, energy) where
+          times (ndarray): ndarray of times where snapshot where taken
+          x (ndarray of shape (tot_sims, tot_snapshots)): x[sim][ts] = position of
+            the brownian particle in simulation number num and snapshot ts
+          power (ndarray of shape (tot_sims, tot_snapshots)): power[sim][ts] = power into
+            the system at snapshot ts and simulation sim
+          work (ndarray of shape (tot_sims, tot_snapshots)): work[sim][ts] perfomed into
+            the system in simulation sim up to snapshot ts
+          heat (ndarray of shape (tot_sims, tot_snapshots)): heat[sim][ts] into
+            the system in simulation sim up to snapshot ts
+          delta_U (ndarray of shape (tot_sims, tot_snapshots)): energy[sim][ts]
+            difference between snapshot = 0 and current snapshot ts in
+            simulation sim 
+          energy (ndarray of shape (tot_sims, tot_snapshots)):
+          energy[sim][ts] in simulation sim at snapshot ts 
+    """
+    self.tot_sims = tot_sims
+    self.dt = dt
+    self.tot_steps = tot_steps
+    self.noise_scaler = noise_scaler
+    self.snapshot_step = snapshot_step
+    self.k = k 
+    self.center = center 
+
+    (times, x, power, work, heat, delta_U, energy) = results
+    self.results = {
+      'times': times,
+      'x': x,
+      'power': power,
+      'work': work,
+      'heat': heat,
+      'delta_U': delta_U,
+      'energy': energy
+    }
+
+
+class Simulator:
+  """Simulator class for Langevin dynamics of a harmonic oscillator with
+  variable potential. Encapsulates the simulator, perform
+  simulations, analyses them and store results
+  of simulation 
+  """
+  def __init__(self, tot_sims = 1000, dt = 0.001, tot_steps = 10000, noise_scaler=1.0, snapshot_step=100, k=k, center=center):
+    """Initializes the Simulator
+
+    Args:
+        tot_sims (int, optional): total number of simulations. Defaults to 1000.
+        dt (float, optional): time step. Defaults to 0.001.
+        tot_steps (int, optional): total steps of each simulation. Defaults to 10000.
+        noise_scaler (float, optional): brownian noise scale k_B T. Defaults to 1.0.
+        snapshot_step (int, optional): save a snapshot of simulation at
+        each snapshot_step time. Defaults to 100.
+        k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
+        center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+    """
+
+    # store the default parameters for simulations
+    self.tot_sims = tot_sims
+    self.dt = dt
+    self.tot_steps = tot_steps
+    self.noise_scaler = noise_scaler
+    self.snapshot_step = snapshot_step
+    self.k = k
+    self.center = center
+    self.simulator = make_simulator(tot_sims=tot_sims, dt=dt, tot_steps=tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center)
+
+    self.simulations_performed = 0
+    # list of Simulations classes to store results of simulations
+    self.simulation = []
+
+  def run(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step):
+    """Runs a simulation and store the results
+
+    Args:
+      tot_sims (int, optional): total number of simulations. 
+      dt (float, optional): time step. 
+      tot_steps (int, optional): total steps of each simulation. 
+      noise_scaler (float, optional): brownian noise scale k_B T. 
+      snapshot_step (int, optional): save a snapshot of simulation at
+        each snapshot_step time. 
+    """
+
+    results = self.simulator(tot_sims, dt, tot_steps, noise_scaler, snapshot_step)
+    sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results)
+    self.simulation.append(sim)
+    self.simulations_performed += 1
