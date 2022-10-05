@@ -66,6 +66,36 @@ def dummy_sim_const_histo():
     sim
   )
 
+@pytest.fixture
+def dummy_sim_gaussian():
+  """Builds a dummy simulation with gaussian PDFs for results
+  """
+  def k(t):
+    """t |--> 1.0 """
+    return 1.0
+  def center(t):
+    """t |--> 0.0"""
+    return 0.0
+  tot_sims = 1000000
+  dt = 1.0
+  tot_steps = 100
+  snapshot_step = 50
+  noise_scaler = 1.0
+  # tot_snapshots = int(tot_steps/snapshot_step)+1
+  x = np.random.normal(loc=[0.0, 1.0, 2.0], scale=[1.0, 3.0, 5.0], size=(tot_sims, 3))
+  work = x
+  power = x
+  heat = x
+  delta_U = x
+  energy = x
+  times=np.arange(0, (1+tot_steps)*dt, dt*snapshot_step)
+  results = (times, x, power, work, heat, delta_U, energy)
+  sim = Simulation(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center, results=results)
+  return (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  )
 
 def test_simulation_init(dummy_sim):
   """Tests correct creation of a simulation class and store of parameters
@@ -199,8 +229,52 @@ def test_pdf_call(dummy_sim_const_histo):
   ) = dummy_sim_const_histo
   sim.build_histogram('x', bins=bins, q_range =(0.0, 1.0))
   sim.build_pdf('x')
-  for x in np.arange(-2.0, 2.0, 0.1):
+  for x in np.arange(0.0, 1.0, 0.1):
     assert sim.pdf['x'](x,0) == pdf_theo(x)
   
+def test_pdf_quantity_out_of_bounds(dummy_sim_const_histo):
+  """Test pdf raise exception if quantity is out of bounds"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_histogram('x')
+  sim.build_pdf('x')
+  with pytest.raises(ValueError):
+    # for x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+    # the PDF is not defined for x = 2, t=0
+    sim.pdf['x'](2,0)
 
-  
+
+def test_pdf_time_out_of_bounds(dummy_sim_const_histo):
+  """Test pdf raise exception if quantity is out of bounds"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_histogram('x')
+  sim.build_pdf('x')
+  with pytest.raises(ValueError):
+    # for x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+    # the PDF is not defined for t=1
+    sim.pdf['x'](0,1)
+
+def test_pdf_gaussian_call(dummy_sim_gaussian):
+  """Test pdf correctly build for simple realization"""
+  def gaussian(x, x0, sigma):
+    return np.exp(-(x-x0)**2/(2*sigma*sigma))/np.sqrt(2*np.pi*sigma**2)
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_gaussian
+  # x = np.random.normal(loc=[0.0, 1.0, 2.0], scale=[1.0, 3.0, 5.0], size=(tot_sims, 3))
+  sim.build_histogram('x', bins=1000)
+  sim.build_pdf('x')
+  tol = 4.7E-2
+  for x in np.arange(-1.0, 1.0, 0.1):
+    assert sim.pdf['x'](x,0) == pytest.approx(gaussian(x, 0.0, 1.0), rel=tol), f"for x={x}, t=0"
+  for x in np.arange(0.0, 3.0, 0.1):
+    assert sim.pdf['x'](x,51) == pytest.approx(gaussian(x, 1.0, 3.0), rel=tol), f"for x={x}, t=51"

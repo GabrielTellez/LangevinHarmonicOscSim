@@ -282,13 +282,14 @@ class Simulation:
     self.histogram = {}
     self.pdf = {}
 
-  def build_histogram(self, quantity, bins = 300, q_range = (-3.0, 3.0)):
+  def build_histogram(self, quantity, bins = 300, q_range = None):
     """Builds the histogram of a quantity
 
     Args:
         quantity (string): quantity to build its histogram. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
         bins (int, optional): bins for the histogram. Defaults to 300.
-        q_range (list, optional): range for the quantity. Defaults to [-3.0, 3.0].
+        q_range (list, optional): range for the quantity. Defaults to
+        None for automatic range.
     """
     if quantity not in self.result_labels:
       raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
@@ -307,13 +308,20 @@ class Simulation:
       self.build_histogram(quantity)
     def pdf(x, t):
       # time t to snapshot index ti
-      ti = int(t/self.snapshot_step)
+      bins_t = self.results['times']
+      if t < np.min(bins_t) or t > np.max(bins_t):
+        raise ValueError(f"In PDF of {quantity}: time={t} is out of bounds [{np.min(bins_t)}, {np.max(bins_t)}]")
+      ti = np.digitize(t, bins_t) - 1
+      if ti < 0: 
+        ti=0
+      
       # self.histogram[quantity][ti, 0] # contains P(x)
       # self.histogram[quantity][ti, 1] # contains x
       # get the index corresponding to value x in the bins
       bins_x = self.histogram[quantity][ti, 1]
       if x < np.min(bins_x) or x > np.max(bins_x):
-        return 0.0
+        raise ValueError(f"{quantity}={x} is out of bounds [{np.min(bins_x)}, {np.max(bins_x)}")
+    
       index_x = np.digitize(x, bins_x) - 1
       if index_x < 0: 
         index_x=0
