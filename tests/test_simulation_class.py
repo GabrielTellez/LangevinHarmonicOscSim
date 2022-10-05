@@ -273,8 +273,67 @@ def test_pdf_gaussian_call(dummy_sim_gaussian):
   # x = np.random.normal(loc=[0.0, 1.0, 2.0], scale=[1.0, 3.0, 5.0], size=(tot_sims, 3))
   sim.build_histogram('x', bins=1000)
   sim.build_pdf('x')
-  tol = 4.7E-2
+  tol = 5E-2
   for x in np.arange(-1.0, 1.0, 0.1):
     assert sim.pdf['x'](x,0) == pytest.approx(gaussian(x, 0.0, 1.0), rel=tol), f"for x={x}, t=0"
   for x in np.arange(0.0, 3.0, 0.1):
     assert sim.pdf['x'](x,51) == pytest.approx(gaussian(x, 1.0, 3.0), rel=tol), f"for x={x}, t=51"
+
+def test_averages(dummy_sim_const_histo):
+  """Test average arrays correctly build for simple realization"""
+  # with x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+  # the average of x is 
+  aver = (0.0 + 0.0 + 0.5 + 0.5 + 0.5 + 1.0 + 1.0 + 1.0 + 1.0 + 0.8)/10.0
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_averages('x')
+  assert sim.averages['x'][0] == aver
+
+def test_average_call(dummy_sim_const_histo):
+  """Test average function call for simple realization"""
+  # with x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+  # the average of x is 
+  aver = (0.0 + 0.0 + 0.5 + 0.5 + 0.5 + 1.0 + 1.0 + 1.0 + 1.0 + 0.8)/10.0
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_averages('x')
+  assert sim.average_func['x'](0.0) == aver
+
+def test_variance(dummy_sim_const_histo):
+  """Test variance arrays correctly build for simple realization"""
+  # with x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+
+  aver = (0.0 + 0.0 + 0.5 + 0.5 + 0.5 + 1.0 + 1.0 + 1.0 + 1.0 + 0.8)/10.0
+  aver2 = (0.0**2 + 0.0**2 + 0.5**2 + 0.5**2 + 0.5**2 + 1.0**2 + 1.0**2 + 1.0**2 + 1.0**2 + 0.8**2)/10.0
+  var = aver2 - aver**2
+
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_variances('x')
+  assert sim.variances['x'][0] == var
+
+def test_variance_call(dummy_sim_const_histo):
+  """Test variance function call """
+  # with x =[[0.0, 0.0, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 0.8]])
+
+  aver = (0.0 + 0.0 + 0.5 + 0.5 + 0.5 + 1.0 + 1.0 + 1.0 + 1.0 + 0.8)/10.0
+  aver2 = (0.0**2 + 0.0**2 + 0.5**2 + 0.5**2 + 0.5**2 + 1.0**2 + 1.0**2 + 1.0**2 + 1.0**2 + 0.8**2)/10.0
+  var = aver2 - aver**2
+
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim_const_histo
+  sim.build_variances('x')
+  assert sim.variance_func['x'](0) == var
+  

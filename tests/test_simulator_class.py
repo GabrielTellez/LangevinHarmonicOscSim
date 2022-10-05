@@ -58,5 +58,21 @@ def test_run_simulation_store_results_shape():
   assert np.shape(sim_res['energy']) == shape
 
 
+def test_run_simulation_default_parameters():
+  """
+  tests is run of the simulator without arguments runs with the 
+  parameters provided in the constructor.
+  """
+  simulator = Simulator()
+  assert simulator.simulations_performed == 0
+  simulator.run()
+  assert simulator.simulations_performed == 1
+  assert len(simulator.simulation) == 1
+  assert simulator.tot_sims == simulator.simulation[0].tot_sims
+  assert simulator.tot_steps == simulator.simulation[0].tot_steps
+  assert simulator.dt == simulator.simulation[0].dt
+  assert simulator.noise_scaler == simulator.simulation[0].noise_scaler
+  assert simulator.snapshot_step == simulator.simulation[0].snapshot_step
+
 
 

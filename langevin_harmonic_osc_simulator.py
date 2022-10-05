@@ -4,10 +4,14 @@ import plotly.graph_objects as go
 import numba as nb
 
 def k(t):
-  """Default stiffness for the harmonic potential"""
+  """Default stiffness for the harmonic potential
+    t |--> 1.0
+  """
   return 1.0
 def center(t):
-  """Default center for the harmonic potential"""
+  """Default center for the harmonic potential
+    t |--> 0.0
+  """
   return 0.0
 def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1.0, snapshot_step=100, k=k, center=center):
   """Makes a numba compiled njit langevin simulator of a brownian
@@ -281,6 +285,10 @@ class Simulation:
     }
     self.histogram = {}
     self.pdf = {}
+    self.averages = {} 
+    self.average_func = {}
+    self.variances = {}
+    self.variance_func = {}
 
   def build_histogram(self, quantity, bins = 300, q_range = None):
     """Builds the histogram of a quantity
@@ -328,6 +336,75 @@ class Simulation:
       return self.histogram[quantity][ti, 0][index_x]
     self.pdf[quantity] = pdf    
 
+  def build_averages(self, quantity):
+    """Computes the average of a quantity. 
+    The average at time t (with corresponding time_index of the snapshot)
+    is stored in averages[quantity][time_index]
+    A function giving the average as a function of time is created and
+    stored in average_func(quantity)
+
+    Args:
+        quantity (string): quantity to build its averages. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Raises:
+        ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    self.averages[quantity] = np.average(self.results[quantity], axis=0)
+    def av_fnct(t):
+      # time t to snapshot index ti
+      bins_t = self.results['times']
+      if t < np.min(bins_t) or t > np.max(bins_t):
+        raise ValueError(f"In average of {quantity}: time={t} is out of bounds [{np.min(bins_t)}, {np.max(bins_t)}]")
+      ti = np.digitize(t, bins_t) - 1
+      if ti < 0: 
+        ti=0
+      return self.averages[quantity][ti]
+    self.average_func[quantity] = av_fnct 
+
+  def build_variances(self, quantity):
+    """Computes the variance of a quantity. 
+    The variance at time t (with corresponding time_index of the snapshot)
+    is stored in variances[quantity][time_index]
+    A function giving the variance as a function of time is created and
+    stored in variance_func(quantity)
+
+    Args:
+        quantity (string): quantity to build its variances. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Raises:
+        ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    self.variances[quantity] = np.var(self.results[quantity], axis=0)
+    def var_fnct(t):
+      # time t to snapshot index ti
+      bins_t = self.results['times']
+      if t < np.min(bins_t) or t > np.max(bins_t):
+        raise ValueError(f"In average of {quantity}: time={t} is out of bounds [{np.min(bins_t)}, {np.max(bins_t)}]")
+      ti = np.digitize(t, bins_t) - 1
+      if ti < 0: 
+        ti=0
+      return self.variances[quantity][ti]
+    self.variance_func[quantity] = var_fnct 
+
+  def animate_pdf(self,quantity, x_range=[-3.0, 3.0], y_range=[0, 1.5], bins=300, show_x_eq_distrib=None):
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    if show_x_eq_distrib == None:
+      show_x_eq_distrib = (quantity == 'x')
+    return animate_simulation(self.results['times'], self.results[quantity], 
+                       x_range=x_range, y_range=y_range, 
+                       bins=bins, 
+                       x_label=quantity, y_label=f'P({quantity},t)', 
+                       show_x_eq_distrib=show_x_eq_distrib, 
+                       k=self.k, center=self.center)
+
+
 class Simulator:
   """Simulator class for Langevin dynamics of a harmonic oscillator with
   variable potential. Encapsulates the simulator, perform
@@ -362,7 +439,7 @@ class Simulator:
     # list of Simulations classes to store results of simulations
     self.simulation = []
 
-  def run(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step):
+  def run(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None):
     """Runs a simulation and store the results
 
     Args:
@@ -373,6 +450,16 @@ class Simulator:
       snapshot_step (int, optional): save a snapshot of simulation at
         each snapshot_step time. 
     """
+    if tot_sims == None:
+      tot_sims = self.tot_sims
+    if dt == None:
+      dt = self.dt
+    if tot_steps == None:
+      tot_steps = self.tot_steps
+    if noise_scaler == None:
+      noise_scaler = self.noise_scaler
+    if snapshot_step == None:
+      snapshot_step = self.snapshot_step
 
     results = self.simulator(tot_sims, dt, tot_steps, noise_scaler, snapshot_step)
     sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results)

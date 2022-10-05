@@ -83,6 +83,6 @@ Tests for use with pytest for the simulator
 
 Scripts to run jupyter notebook remotely on a SLURM cluster
 
-## test_devel_code/
+## devel_code/
 
-Tests and developement code (undocumented)
+Developement code (undocumented)
