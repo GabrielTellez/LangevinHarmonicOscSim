@@ -1,6 +1,7 @@
 from ..langevin_harmonic_osc_simulator import Simulation
 import numpy as np
 import pytest
+import os
 
 @pytest.fixture
 def dummy_sim():
@@ -26,7 +27,7 @@ def dummy_sim():
   energy = np.random.random_sample((tot_sims, tot_snapshots))
   times=np.arange(0, (1+tot_steps)*dt, dt*snapshot_step)
   results = (times, x, power, work, heat, delta_U, energy)
-  sim = Simulation(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center, results=results)
+  sim = Simulation(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center, results=results, name="dummy simulation")
   return (
     tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
     k, center, results,
@@ -336,4 +337,58 @@ def test_variance_call(dummy_sim_const_histo):
   ) = dummy_sim_const_histo
   sim.build_variances('x')
   assert sim.variance_func['x'](0) == var
+
+def compare_sims_params(s1, s2):
+  """Compare if two sims have equal parameters"""
+  params = ['tot_sims', 'dt', 'tot_steps', 'noise_scaler', 'snapshot_step']
+  for k in params:
+    assert s1.__dict__[k] == s2.__dict__[k]
+
+def compare_sims_results(s1, s2):
+  """Compare if two sims have equal results"""
+  labels = ["times","x", "power", "work", "heat", "delta_U", "energy"]
+  for k in labels:
+    assert np.array_equal(s1.results[k], s2.results[k])
+
+def compare_sims_k_center(s1, s2):
+  """Compare if two sims have the same functions for k(t) and
+  center(t)"""
+  t = np.arange(0,10,0.1)
+  assert np.array_equal(s1.k(t), s2.k(t))
+  assert np.array_equal(s1.center(t), s2.center(t))
+
+
+def test_save_load_simulation(dummy_sim):
+  """Tests that the class can be saved and reloaded"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  filename="dummy_sim_test_save.pickle"
+  sim.save(filename)
+  new_sim = Simulation.load(filename)
+  compare_sims_params(sim, new_sim)
+  compare_sims_results(sim, new_sim)
+  compare_sims_k_center(sim, new_sim)
+  os.remove(filename)
+
+def test_name_simulation(dummy_sim):
+  """Test if the simulation has a name"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  assert sim.name == "dummy simulation"
+
+def test_str_simulation(dummy_sim): 
+  """Test that the __str__ method shows the name of the simulation"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  assert str(sim) == f'Simulation "{sim.name}"'
   
+

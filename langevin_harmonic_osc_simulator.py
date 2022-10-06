@@ -2,6 +2,9 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import numba as nb
+import cloudpickle
+import pickle
+
 
 def k(t):
   """Default stiffness for the harmonic potential
@@ -238,7 +241,7 @@ class Simulation:
   work, etc..)
   """
   result_labels = ["x", "power", "work", "heat", "delta_U", "energy"]
-  def __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results):
+  def __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name=""):
     """Initializes the Simulation class with parameters and raw results
 
     Args:
@@ -264,12 +267,14 @@ class Simulation:
             simulation sim 
           energy (ndarray of shape (tot_sims, tot_snapshots)):
           energy[sim][ts] in simulation sim at snapshot ts 
+        name (string, optional): name of the simulation
     """
     self.tot_sims = tot_sims
     self.dt = dt
     self.tot_steps = tot_steps
     self.noise_scaler = noise_scaler
     self.snapshot_step = snapshot_step
+    self.name = name
     self.k = k 
     self.center = center 
 
@@ -289,6 +294,9 @@ class Simulation:
     self.average_func = {}
     self.variances = {}
     self.variance_func = {}
+    
+  def __str__(self):
+    return f'Simulation "{self.name}"'
 
   def build_histogram(self, quantity, bins = 300, q_range = None):
     """Builds the histogram of a quantity
@@ -393,6 +401,22 @@ class Simulation:
     self.variance_func[quantity] = var_fnct 
 
   def animate_pdf(self,quantity, x_range=[-3.0, 3.0], y_range=[0, 1.5], bins=300, show_x_eq_distrib=None):
+    """Shows an animation of the evolution of the PDF of a quantity
+
+    Args:
+        quantity (string): quantity to animate its PDF. Must be in ["x", "power", "work", "heat", "delta_U", "energy"]
+        x_range (list, optional): range for the quantity in the PDF. Defaults to [-3.0, 3.0].
+        y_range (list, optional): range for the PDF value. Defaults to [0, 1.5].
+        bins (int, optional): bins for the histogram. Defaults to 300.
+        show_x_eq_distrib (boolean, optional): if True the instantaneous
+        equilibrium position distribution is shown. Defaults to None.
+
+    Raises:
+        ValueError: quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Returns:
+        Plotly graphics object: animation of the PDF
+    """
     if quantity not in self.result_labels:
       raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
     if show_x_eq_distrib == None:
@@ -404,6 +428,28 @@ class Simulation:
                        show_x_eq_distrib=show_x_eq_distrib, 
                        k=self.k, center=self.center)
 
+  def save(self, filename):
+    """Saves the simulation
+
+    Args:
+        filename (string): filename where the simulation is saved
+    """
+    with open(filename, 'wb') as f:
+      cloudpickle.dump(self, f, pickle.DEFAULT_PROTOCOL)
+
+  def load(filename):
+    """Loads a simulation from file
+
+    Args:
+        filename (string): filename of the simulation to load the
+
+    Returns:
+        Simulation: the loaded simulation
+    """
+    with open(filename, 'rb') as f:
+      _sim = pickle.load(f)
+    return _sim
+    
 
 class Simulator:
   """Simulator class for Langevin dynamics of a harmonic oscillator with
@@ -439,7 +485,7 @@ class Simulator:
     # list of Simulations classes to store results of simulations
     self.simulation = []
 
-  def run(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None):
+  def run(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None, name=""):
     """Runs a simulation and store the results
 
     Args:
@@ -449,6 +495,7 @@ class Simulator:
       noise_scaler (float, optional): brownian noise scale k_B T. 
       snapshot_step (int, optional): save a snapshot of simulation at
         each snapshot_step time. 
+      name (str, optional): name of the simulation
     """
     if tot_sims == None:
       tot_sims = self.tot_sims
@@ -462,6 +509,6 @@ class Simulator:
       snapshot_step = self.snapshot_step
 
     results = self.simulator(tot_sims, dt, tot_steps, noise_scaler, snapshot_step)
-    sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results)
+    sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results, name)
     self.simulation.append(sim)
     self.simulations_performed += 1

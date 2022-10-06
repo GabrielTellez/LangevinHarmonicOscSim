@@ -75,4 +75,22 @@ def test_run_simulation_default_parameters():
   assert simulator.snapshot_step == simulator.simulation[0].snapshot_step
 
 
+def test_run_simulation_store_name():
+  """
+  tests the simulator class runs a named simulation and correctly store
+  its name
+  """
+
+  tot_sims = 1000
+  dt = 0.0001
+  tot_steps = 1000
+  noise_scaler = 1
+  snapshot_step = 100
+  name = "test simulation"
+
+  simulator = Simulator()
+  assert simulator.simulations_performed == 0
+  simulator.run(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler = noise_scaler, snapshot_step = snapshot_step, name=name)
+  assert name == simulator.simulation[0].name
+
 
