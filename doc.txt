@@ -1,0 +1,230 @@
+Python Library Documentation: module langevin_harmonic_osc_simulator
+
+NAME
+    langevin_harmonic_osc_simulator
+
+CLASSES
+    builtins.object
+        Simulation
+        Simulator
+    
+    class Simulation(builtins.object)
+     |  Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+     |  
+     |  Stores simulation parameters and results. 
+     |  Analyses the results: builds PDF of the simulation results (position,
+     |  work, etc..)
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+     |      Initializes the Simulation class with parameters and raw results
+     |      
+     |      Args:
+     |          tot_sims (int): total number of simulations.
+     |          dt (float): time step.
+     |          tot_steps (int): number of steps of each simulation.
+     |          noise_scaler (float): brownian noise scale k_B T. Defaults to 1.0.
+     |          snapshot_step (int): a snapshot of simulation has been saved each snapshot_step time.
+     |          k (float function): stiffness of the potential
+     |          center (float function): center of the potential
+     |          results (tuple): results in the form (times, x, power, work, heat, delta_U, energy) where
+     |            times (ndarray): ndarray of times where snapshot where taken
+     |            x (ndarray of shape (tot_sims, tot_snapshots)): x[sim][ts] = position of
+     |              the brownian particle in simulation number num and snapshot ts
+     |            power (ndarray of shape (tot_sims, tot_snapshots)): power[sim][ts] = power into
+     |              the system at snapshot ts and simulation sim
+     |            work (ndarray of shape (tot_sims, tot_snapshots)): work[sim][ts] perfomed into
+     |              the system in simulation sim up to snapshot ts
+     |            heat (ndarray of shape (tot_sims, tot_snapshots)): heat[sim][ts] into
+     |              the system in simulation sim up to snapshot ts
+     |            delta_U (ndarray of shape (tot_sims, tot_snapshots)): energy[sim][ts]
+     |              difference between snapshot = 0 and current snapshot ts in
+     |              simulation sim 
+     |            energy (ndarray of shape (tot_sims, tot_snapshots)):
+     |            energy[sim][ts] in simulation sim at snapshot ts 
+     |          name (string, optional): name of the simulation
+     |  
+     |  __str__(self)
+     |      Return str(self).
+     |  
+     |  animate_pdf(self, quantity, x_range=[-3.0, 3.0], y_range=[0, 1.5], bins=300, show_x_eq_distrib=None)
+     |      Shows an animation of the evolution of the PDF of a quantity
+     |      
+     |      Args:
+     |          quantity (string): quantity to animate its PDF. Must be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |          x_range (list, optional): range for the quantity in the PDF. Defaults to [-3.0, 3.0].
+     |          y_range (list, optional): range for the PDF value. Defaults to [0, 1.5].
+     |          bins (int, optional): bins for the histogram. Defaults to 300.
+     |          show_x_eq_distrib (boolean, optional): if True the instantaneous
+     |          equilibrium position distribution is shown. Defaults to None.
+     |      
+     |      Raises:
+     |          ValueError: quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Returns:
+     |          Plotly graphics object: animation of the PDF
+     |  
+     |  build_averages(self, quantity)
+     |      Computes the average of a quantity. 
+     |      The average at time t (with corresponding time_index of the snapshot)
+     |      is stored in averages[quantity][time_index]
+     |      A function giving the average as a function of time is created and
+     |      stored in average_func(quantity)
+     |      
+     |      Args:
+     |          quantity (string): quantity to build its averages. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Raises:
+     |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |  
+     |  build_histogram(self, quantity, bins=300, q_range=None)
+     |      Builds the histogram of a quantity
+     |      
+     |      Args:
+     |          quantity (string): quantity to build its histogram. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |          bins (int, optional): bins for the histogram. Defaults to 300.
+     |          q_range (list, optional): range for the quantity. Defaults to
+     |          None for automatic range.
+     |  
+     |  build_pdf(self, quantity)
+     |      Builds the probability density function for a quantity
+     |      
+     |      Args:
+     |          quantity (string): quantity to build its pdf. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |  
+     |  build_variances(self, quantity)
+     |      Computes the variance of a quantity. 
+     |      The variance at time t (with corresponding time_index of the snapshot)
+     |      is stored in variances[quantity][time_index]
+     |      A function giving the variance as a function of time is created and
+     |      stored in variance_func(quantity)
+     |      
+     |      Args:
+     |          quantity (string): quantity to build its variances. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Raises:
+     |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |  
+     |  load(filename)
+     |      Loads a simulation from file
+     |      
+     |      Args:
+     |          filename (string): filename of the simulation to load the
+     |      
+     |      Returns:
+     |          Simulation: the loaded simulation
+     |  
+     |  save(self, filename)
+     |      Saves the simulation
+     |      
+     |      Args:
+     |          filename (string): filename where the simulation is saved
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  result_labels = ['x', 'power', 'work', 'heat', 'delta_U', 'energy']
+    
+    class Simulator(builtins.object)
+     |  Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+     |  
+     |  Simulator class for Langevin dynamics of a harmonic oscillator with
+     |  variable potential. Encapsulates the simulator, perform
+     |  simulations, analyses them and store results
+     |  of simulation
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+     |      Initializes the Simulator
+     |      
+     |      Args:
+     |          tot_sims (int, optional): total number of simulations. Defaults to 1000.
+     |          dt (float, optional): time step. Defaults to 0.001.
+     |          tot_steps (int, optional): total steps of each simulation. Defaults to 10000.
+     |          noise_scaler (float, optional): brownian noise scale k_B T. Defaults to 1.0.
+     |          snapshot_step (int, optional): save a snapshot of simulation at
+     |          each snapshot_step time. Defaults to 100.
+     |          k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
+     |          center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+     |  
+     |  run(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None, name='')
+     |      Runs a simulation and store the results
+     |      
+     |      Args:
+     |        tot_sims (int, optional): total number of simulations. 
+     |        dt (float, optional): time step. 
+     |        tot_steps (int, optional): total steps of each simulation. 
+     |        noise_scaler (float, optional): brownian noise scale k_B T. 
+     |        snapshot_step (int, optional): save a snapshot of simulation at
+     |          each snapshot_step time. 
+     |        name (str, optional): name of the simulation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+FUNCTIONS
+    animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+        Plot and animates a simulation data results
+        
+        Args:
+            times (list of float): list of times where snapshots where taken
+            xst (list of list of float): list of snapshots of many
+              simulations. Should have shape (tot_sims, tot_snapshots)  
+            x_range (list, optional): range of the data to plot. Defaults to [-3.0, 6.0].
+            y_range (list, optional): range of the histogram of xst. Defaults to [0, 1.5].
+            bins (int, optional): bins to compute histogram of xst. Defaults to 300.
+            x_label (str, optional): label for xst in the plot. Defaults to 'x'.
+            y_label (str, optional): label for the probability density of xst. Defaults to 'P(x,t)'.
+            show_x_eq_distrib (bool, optional): show the equilibrium
+              distribution corresponding to a harmonic oscilator with center(t)
+              and stiffness k(t). Defaults to True.
+            k (float function, optional): stiffness function of the potential. Defaults to k(t)=1.0.
+            center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+        
+        Returns:
+            Plotly graphics object: animation of the simulation data
+    
+    center(t)
+        Default center for the harmonic potential
+        t |--> 0.0
+    
+    k(t)
+        Default stiffness for the harmonic potential
+        t |--> 1.0
+    
+    make_simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+        Makes a numba compiled njit langevin simulator of a brownian
+        particle in a harmonic potential with a given stiffness function k and center
+        
+        Args:
+            tot_sims (int, optional): default total number of simulations. Defaults to 1000.
+            dt (float, optional): default time step. Defaults to 0.001.
+            tot_steps (int, optional): default number of steps of each simulation. Defaults to 10000.
+            noise_scaler (float, optional): brownian noise scale k_B T. Defaults to 1.0.
+            snapshot_step (int, optional): save a snapshot of simulation at
+            each snapshot_step time. Defaults to 100.
+            k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
+            center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+        
+        Returns:
+            njitted function: numba compiled function that performs simulation
+
+
+

@@ -71,9 +71,34 @@ Args:
 Returns:
 Plotly graphics object: animation of the simulation data
 
+## Simulation and Simulator classes
+
+### class Simulation
+
+- Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+
+- Stores simulation parameters and results.
+
+- Analyses the results: builds PDF of the simulation results (position work, etc..)
+
+### class Simulator
+
+- Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k>, center=<function center>)
+  
+- Simulator class for Langevin dynamics of a harmonic oscillator with
+variable potential. Encapsulates the simulator, perform
+simulations, analyses them and store results
+of simulations.
+
+### For further details, see the documentation [html](doc.html) or [plain text](doc.txt).
+
 ## "test-mylibrary.ipynb"
 
 Jupyter notebook illustrating the use of the simulation library.
+
+## "test-simulation-class.ipynb"
+
+Jupyter notebook illustration the use of the classes Simulator and Simulation
 
 ## tests/
 
@@ -85,4 +110,4 @@ Scripts to run jupyter notebook remotely on a SLURM cluster
 
 ## devel_code/
 
-Developement code (undocumented)
+Developement and test code (undocumented)

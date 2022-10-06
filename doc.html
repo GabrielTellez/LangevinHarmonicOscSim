@@ -1,0 +1,251 @@
+Python Library Documentation: module langevin_harmonic_osc_simulator
+
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>langevin_harmonic_osc_simulator</strong></big></big></font></td
+><td align=right valign=bottom
+>    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="cloudpickle.html">cloudpickle</a><br>
+<a href="plotly.graph_objects.html">plotly.graph_objects</a><br>
+</td><td width="25%" valign=top><a href="numba.html">numba</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="pickle.html">pickle</a><br>
+<a href="plotly.express.html">plotly.express</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="langevin_harmonic_osc_simulator.html#Simulation">Simulation</a>
+</font></dt><dt><font face="helvetica, arial"><a href="langevin_harmonic_osc_simulator.html#Simulator">Simulator</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Simulation">class <strong>Simulation</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Simulation">Simulation</a>(tot_sims,&nbsp;dt,&nbsp;tot_steps,&nbsp;noise_scaler,&nbsp;snapshot_step,&nbsp;k,&nbsp;center,&nbsp;results,&nbsp;name='')<br>
+&nbsp;<br>
+Stores&nbsp;simulation&nbsp;parameters&nbsp;and&nbsp;results.&nbsp;<br>
+Analyses&nbsp;the&nbsp;results:&nbsp;builds&nbsp;PDF&nbsp;of&nbsp;the&nbsp;simulation&nbsp;results&nbsp;(position,<br>
+work,&nbsp;etc..)<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Simulation-__init__"><strong>__init__</strong></a>(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulation">Simulation</a>&nbsp;class&nbsp;with&nbsp;parameters&nbsp;and&nbsp;raw&nbsp;results<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int):&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dt&nbsp;(float):&nbsp;time&nbsp;step.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tot_steps&nbsp;(int):&nbsp;number&nbsp;of&nbsp;steps&nbsp;of&nbsp;each&nbsp;simulation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;noise_scaler&nbsp;(float):&nbsp;brownian&nbsp;noise&nbsp;scale&nbsp;k_B&nbsp;T.&nbsp;Defaults&nbsp;to&nbsp;1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;snapshot_step&nbsp;(int):&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;simulation&nbsp;has&nbsp;been&nbsp;saved&nbsp;each&nbsp;snapshot_step&nbsp;time.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function):&nbsp;stiffness&nbsp;of&nbsp;the&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function):&nbsp;center&nbsp;of&nbsp;the&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;results&nbsp;(tuple):&nbsp;results&nbsp;in&nbsp;the&nbsp;form&nbsp;(times,&nbsp;x,&nbsp;power,&nbsp;work,&nbsp;heat,&nbsp;delta_U,&nbsp;energy)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;times&nbsp;(ndarray):&nbsp;ndarray&nbsp;of&nbsp;times&nbsp;where&nbsp;snapshot&nbsp;where&nbsp;taken<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):&nbsp;x[sim][ts]&nbsp;=&nbsp;position&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;brownian&nbsp;particle&nbsp;in&nbsp;simulation&nbsp;number&nbsp;num&nbsp;and&nbsp;snapshot&nbsp;ts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;power&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):&nbsp;power[sim][ts]&nbsp;=&nbsp;power&nbsp;into<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;system&nbsp;at&nbsp;snapshot&nbsp;ts&nbsp;and&nbsp;simulation&nbsp;sim<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;work&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):&nbsp;work[sim][ts]&nbsp;perfomed&nbsp;into<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;system&nbsp;in&nbsp;simulation&nbsp;sim&nbsp;up&nbsp;to&nbsp;snapshot&nbsp;ts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heat&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):&nbsp;heat[sim][ts]&nbsp;into<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;system&nbsp;in&nbsp;simulation&nbsp;sim&nbsp;up&nbsp;to&nbsp;snapshot&nbsp;ts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delta_U&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):&nbsp;energy[sim][ts]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;difference&nbsp;between&nbsp;snapshot&nbsp;=&nbsp;0&nbsp;and&nbsp;current&nbsp;snapshot&nbsp;ts&nbsp;in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simulation&nbsp;sim&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;energy[sim][ts]&nbsp;in&nbsp;simulation&nbsp;sim&nbsp;at&nbsp;snapshot&nbsp;ts&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;(string,&nbsp;optional):&nbsp;name&nbsp;of&nbsp;the&nbsp;simulation</tt></dd></dl>
+
+<dl><dt><a name="Simulation-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+
+<dl><dt><a name="Simulation-animate_pdf"><strong>animate_pdf</strong></a>(self, quantity, x_range=[-3.0, 3.0], y_range=[0, 1.5], bins=300, show_x_eq_distrib=None)</dt><dd><tt>Shows&nbsp;an&nbsp;animation&nbsp;of&nbsp;the&nbsp;evolution&nbsp;of&nbsp;the&nbsp;PDF&nbsp;of&nbsp;a&nbsp;quantity<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;animate&nbsp;its&nbsp;PDF.&nbsp;Must&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x_range&nbsp;(list,&nbsp;optional):&nbsp;range&nbsp;for&nbsp;the&nbsp;quantity&nbsp;in&nbsp;the&nbsp;PDF.&nbsp;Defaults&nbsp;to&nbsp;[-3.0,&nbsp;3.0].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_range&nbsp;(list,&nbsp;optional):&nbsp;range&nbsp;for&nbsp;the&nbsp;PDF&nbsp;value.&nbsp;Defaults&nbsp;to&nbsp;[0,&nbsp;1.5].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bins&nbsp;(int,&nbsp;optional):&nbsp;bins&nbsp;for&nbsp;the&nbsp;histogram.&nbsp;Defaults&nbsp;to&nbsp;300.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;show_x_eq_distrib&nbsp;(boolean,&nbsp;optional):&nbsp;if&nbsp;True&nbsp;the&nbsp;instantaneous<br>
+&nbsp;&nbsp;&nbsp;&nbsp;equilibrium&nbsp;position&nbsp;distribution&nbsp;is&nbsp;shown.&nbsp;Defaults&nbsp;to&nbsp;None.<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;animation&nbsp;of&nbsp;the&nbsp;PDF</tt></dd></dl>
+
+<dl><dt><a name="Simulation-build_averages"><strong>build_averages</strong></a>(self, quantity)</dt><dd><tt>Computes&nbsp;the&nbsp;average&nbsp;of&nbsp;a&nbsp;quantity.&nbsp;<br>
+The&nbsp;average&nbsp;at&nbsp;time&nbsp;t&nbsp;(with&nbsp;corresponding&nbsp;time_index&nbsp;of&nbsp;the&nbsp;snapshot)<br>
+is&nbsp;stored&nbsp;in&nbsp;averages[quantity][time_index]<br>
+A&nbsp;function&nbsp;giving&nbsp;the&nbsp;average&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time&nbsp;is&nbsp;created&nbsp;and<br>
+stored&nbsp;in&nbsp;average_func(quantity)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;build&nbsp;its&nbsp;averages.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]</tt></dd></dl>
+
+<dl><dt><a name="Simulation-build_histogram"><strong>build_histogram</strong></a>(self, quantity, bins=300, q_range=None)</dt><dd><tt>Builds&nbsp;the&nbsp;histogram&nbsp;of&nbsp;a&nbsp;quantity<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;build&nbsp;its&nbsp;histogram.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bins&nbsp;(int,&nbsp;optional):&nbsp;bins&nbsp;for&nbsp;the&nbsp;histogram.&nbsp;Defaults&nbsp;to&nbsp;300.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;q_range&nbsp;(list,&nbsp;optional):&nbsp;range&nbsp;for&nbsp;the&nbsp;quantity.&nbsp;Defaults&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None&nbsp;for&nbsp;automatic&nbsp;range.</tt></dd></dl>
+
+<dl><dt><a name="Simulation-build_pdf"><strong>build_pdf</strong></a>(self, quantity)</dt><dd><tt>Builds&nbsp;the&nbsp;probability&nbsp;density&nbsp;function&nbsp;for&nbsp;a&nbsp;quantity<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;build&nbsp;its&nbsp;pdf.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]</tt></dd></dl>
+
+<dl><dt><a name="Simulation-build_variances"><strong>build_variances</strong></a>(self, quantity)</dt><dd><tt>Computes&nbsp;the&nbsp;variance&nbsp;of&nbsp;a&nbsp;quantity.&nbsp;<br>
+The&nbsp;variance&nbsp;at&nbsp;time&nbsp;t&nbsp;(with&nbsp;corresponding&nbsp;time_index&nbsp;of&nbsp;the&nbsp;snapshot)<br>
+is&nbsp;stored&nbsp;in&nbsp;variances[quantity][time_index]<br>
+A&nbsp;function&nbsp;giving&nbsp;the&nbsp;variance&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time&nbsp;is&nbsp;created&nbsp;and<br>
+stored&nbsp;in&nbsp;variance_func(quantity)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;build&nbsp;its&nbsp;variances.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]</tt></dd></dl>
+
+<dl><dt><a name="Simulation-load"><strong>load</strong></a>(filename)</dt><dd><tt>Loads&nbsp;a&nbsp;simulation&nbsp;from&nbsp;file<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(string):&nbsp;filename&nbsp;of&nbsp;the&nbsp;simulation&nbsp;to&nbsp;load&nbsp;the<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Simulation">Simulation</a>:&nbsp;the&nbsp;loaded&nbsp;simulation</tt></dd></dl>
+
+<dl><dt><a name="Simulation-save"><strong>save</strong></a>(self, filename)</dt><dd><tt>Saves&nbsp;the&nbsp;simulation<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(string):&nbsp;filename&nbsp;where&nbsp;the&nbsp;simulation&nbsp;is&nbsp;saved</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>result_labels</strong> = ['x', 'power', 'work', 'heat', 'delta_U', 'energy']</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Simulator">class <strong>Simulator</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Simulator">Simulator</a>(tot_sims=1000,&nbsp;dt=0.001,&nbsp;tot_steps=10000,&nbsp;noise_scaler=1.0,&nbsp;snapshot_step=100,&nbsp;k=&amp;lt;function&nbsp;k&nbsp;at&nbsp;0x000002DFA730D2D0&amp;gt;,&nbsp;center=&amp;lt;function&nbsp;center&nbsp;at&nbsp;0x000002DFACCED870&amp;gt;)<br>
+&nbsp;<br>
+<a href="#Simulator">Simulator</a>&nbsp;class&nbsp;for&nbsp;Langevin&nbsp;dynamics&nbsp;of&nbsp;a&nbsp;harmonic&nbsp;oscillator&nbsp;with<br>
+variable&nbsp;potential.&nbsp;Encapsulates&nbsp;the&nbsp;simulator,&nbsp;perform<br>
+simulations,&nbsp;analyses&nbsp;them&nbsp;and&nbsp;store&nbsp;results<br>
+of&nbsp;simulation<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Simulator-__init__"><strong>__init__</strong></a>(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x000002DFA730D2D0&gt;, center=&lt;function center at 0x000002DFACCED870&gt;)</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulator">Simulator</a><br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int,&nbsp;optional):&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.&nbsp;Defaults&nbsp;to&nbsp;1000.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dt&nbsp;(float,&nbsp;optional):&nbsp;time&nbsp;step.&nbsp;Defaults&nbsp;to&nbsp;0.001.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tot_steps&nbsp;(int,&nbsp;optional):&nbsp;total&nbsp;steps&nbsp;of&nbsp;each&nbsp;simulation.&nbsp;Defaults&nbsp;to&nbsp;10000.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;noise_scaler&nbsp;(float,&nbsp;optional):&nbsp;brownian&nbsp;noise&nbsp;scale&nbsp;k_B&nbsp;T.&nbsp;Defaults&nbsp;to&nbsp;1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;snapshot_step&nbsp;(int,&nbsp;optional):&nbsp;save&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;simulation&nbsp;at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;snapshot_step&nbsp;time.&nbsp;Defaults&nbsp;to&nbsp;100.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;<a href="#-k">k</a>(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.</tt></dd></dl>
+
+<dl><dt><a name="Simulator-run"><strong>run</strong></a>(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None, name='')</dt><dd><tt>Runs&nbsp;a&nbsp;simulation&nbsp;and&nbsp;store&nbsp;the&nbsp;results<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;tot_sims&nbsp;(int,&nbsp;optional):&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.&nbsp;<br>
+&nbsp;&nbsp;dt&nbsp;(float,&nbsp;optional):&nbsp;time&nbsp;step.&nbsp;<br>
+&nbsp;&nbsp;tot_steps&nbsp;(int,&nbsp;optional):&nbsp;total&nbsp;steps&nbsp;of&nbsp;each&nbsp;simulation.&nbsp;<br>
+&nbsp;&nbsp;noise_scaler&nbsp;(float,&nbsp;optional):&nbsp;brownian&nbsp;noise&nbsp;scale&nbsp;k_B&nbsp;T.&nbsp;<br>
+&nbsp;&nbsp;snapshot_step&nbsp;(int,&nbsp;optional):&nbsp;save&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;simulation&nbsp;at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;snapshot_step&nbsp;time.&nbsp;<br>
+&nbsp;&nbsp;name&nbsp;(str,&nbsp;optional):&nbsp;name&nbsp;of&nbsp;the&nbsp;simulation</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-animate_simulation"><strong>animate_simulation</strong></a>(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=&lt;function k at 0x000002DFA730D2D0&gt;, center=&lt;function center at 0x000002DFACCED870&gt;)</dt><dd><tt>Plot&nbsp;and&nbsp;animates&nbsp;a&nbsp;simulation&nbsp;data&nbsp;results<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;times&nbsp;(list&nbsp;of&nbsp;float):&nbsp;list&nbsp;of&nbsp;times&nbsp;where&nbsp;snapshots&nbsp;where&nbsp;taken<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xst&nbsp;(list&nbsp;of&nbsp;list&nbsp;of&nbsp;float):&nbsp;list&nbsp;of&nbsp;snapshots&nbsp;of&nbsp;many<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simulations.&nbsp;Should&nbsp;have&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x_range&nbsp;(list,&nbsp;optional):&nbsp;range&nbsp;of&nbsp;the&nbsp;data&nbsp;to&nbsp;plot.&nbsp;Defaults&nbsp;to&nbsp;[-3.0,&nbsp;6.0].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_range&nbsp;(list,&nbsp;optional):&nbsp;range&nbsp;of&nbsp;the&nbsp;histogram&nbsp;of&nbsp;xst.&nbsp;Defaults&nbsp;to&nbsp;[0,&nbsp;1.5].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bins&nbsp;(int,&nbsp;optional):&nbsp;bins&nbsp;to&nbsp;compute&nbsp;histogram&nbsp;of&nbsp;xst.&nbsp;Defaults&nbsp;to&nbsp;300.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;xst&nbsp;in&nbsp;the&nbsp;plot.&nbsp;Defaults&nbsp;to&nbsp;'x'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;the&nbsp;probability&nbsp;density&nbsp;of&nbsp;xst.&nbsp;Defaults&nbsp;to&nbsp;'P(x,t)'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;show_x_eq_distrib&nbsp;(bool,&nbsp;optional):&nbsp;show&nbsp;the&nbsp;equilibrium<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;corresponding&nbsp;to&nbsp;a&nbsp;harmonic&nbsp;oscilator&nbsp;with&nbsp;<a href="#-center">center</a>(t)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;stiffness&nbsp;<a href="#-k">k</a>(t).&nbsp;Defaults&nbsp;to&nbsp;True.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;animation&nbsp;of&nbsp;the&nbsp;simulation&nbsp;data</tt></dd></dl>
+ <dl><dt><a name="-center"><strong>center</strong></a>(t)</dt><dd><tt>Default&nbsp;center&nbsp;for&nbsp;the&nbsp;harmonic&nbsp;potential<br>
+t&nbsp;|--&gt;&nbsp;0.0</tt></dd></dl>
+ <dl><dt><a name="-k"><strong>k</strong></a>(t)</dt><dd><tt>Default&nbsp;stiffness&nbsp;for&nbsp;the&nbsp;harmonic&nbsp;potential<br>
+t&nbsp;|--&gt;&nbsp;1.0</tt></dd></dl>
+ <dl><dt><a name="-make_simulator"><strong>make_simulator</strong></a>(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x000002DFA730D2D0&gt;, center=&lt;function center at 0x000002DFACCED870&gt;)</dt><dd><tt>Makes&nbsp;a&nbsp;numba&nbsp;compiled&nbsp;njit&nbsp;langevin&nbsp;simulator&nbsp;of&nbsp;a&nbsp;brownian<br>
+particle&nbsp;in&nbsp;a&nbsp;harmonic&nbsp;potential&nbsp;with&nbsp;a&nbsp;given&nbsp;stiffness&nbsp;function&nbsp;k&nbsp;and&nbsp;center<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int,&nbsp;optional):&nbsp;default&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.&nbsp;Defaults&nbsp;to&nbsp;1000.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dt&nbsp;(float,&nbsp;optional):&nbsp;default&nbsp;time&nbsp;step.&nbsp;Defaults&nbsp;to&nbsp;0.001.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tot_steps&nbsp;(int,&nbsp;optional):&nbsp;default&nbsp;number&nbsp;of&nbsp;steps&nbsp;of&nbsp;each&nbsp;simulation.&nbsp;Defaults&nbsp;to&nbsp;10000.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;noise_scaler&nbsp;(float,&nbsp;optional):&nbsp;brownian&nbsp;noise&nbsp;scale&nbsp;k_B&nbsp;T.&nbsp;Defaults&nbsp;to&nbsp;1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;snapshot_step&nbsp;(int,&nbsp;optional):&nbsp;save&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;simulation&nbsp;at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;snapshot_step&nbsp;time.&nbsp;Defaults&nbsp;to&nbsp;100.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;<a href="#-k">k</a>(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;njitted&nbsp;function:&nbsp;numba&nbsp;compiled&nbsp;function&nbsp;that&nbsp;performs&nbsp;simulation</tt></dd></dl>
+</td></tr></table>
