@@ -7,6 +7,26 @@ Simulation of a brownian particle in a harmonic potential
 Library for simulation of a brownian particle on a time-dependent
 harmonic potential
 
+## Simulation and Simulator classes
+
+### class Simulation
+
+- Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+
+- Stores simulation parameters and results.
+
+- Analyses the results: builds PDF of the simulation results (position work, etc..)
+
+### class Simulator
+
+- Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k>, center=<function center>)
+- Simulator class for Langevin dynamics of a harmonic oscillator with
+  variable potential. Encapsulates the simulator, perform
+  simulations, analyses them and store results
+  of simulations.
+
+### For further details, see the documentation [html](doc.html) or [plain text](doc.txt).
+
 ### make_simulator:
 
 Creates a compiled function to simulate a brownian
@@ -46,6 +66,8 @@ Example:
           ie. x[sim] = [x(0), x(snapshot_step*dt), x(2*snapshot_step*dt), .... ] for simulation number sim.
     """
 
+## Graphics utilities
+
 ### animate_simulation
 
 animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=k, center=center):
@@ -71,26 +93,25 @@ Args:
 Returns:
 Plotly graphics object: animation of the simulation data
 
-## Simulation and Simulator classes
+### plot_quantity
 
-### class Simulation
+plot_quantity(t_array, y_array, t_range=None, y_range=None t_label='t',
+y_label='')
 
-- Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+Plots y_array as function of t_array
 
-- Stores simulation parameters and results.
+Args:
 
-- Analyses the results: builds PDF of the simulation results (position work, etc..)
+- t_array (np.array): time axis array of
+- y_array (np.array): quantity to plot array
+- t_range (list, optional): t range. Defaults to Autoscale.
+- y_range (list, optional): y range. Defaults to Autoscale.
+- t_label (str, optional): label for t axis. Defaults to 't'.
+- y_label (str, optional): label for y axis. Defaults to ''.
 
-### class Simulator
+Returns:
 
-- Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k>, center=<function center>)
-  
-- Simulator class for Langevin dynamics of a harmonic oscillator with
-variable potential. Encapsulates the simulator, perform
-simulations, analyses them and store results
-of simulations.
-
-### For further details, see the documentation [html](doc.html) or [plain text](doc.txt).
+- Plotly graphic object: the plot of the quantity
 
 ## "test-mylibrary.ipynb"
 
@@ -102,7 +123,7 @@ Jupyter notebook illustration the use of the classes Simulator and Simulation
 
 ## tests/
 
-Tests for use with pytest for the simulator
+Tests for use with pytest for the simulator ans simulation classes
 
 ## scripts/
 

@@ -11,6 +11,6 @@ run:
 
 `remote-ssh-tunnel.sh node_name`
 
-* Open localhost on port 8879 to open jupyter. The URL is found on `jupyter_log/jupyter-notebook-e*.log`
+* Open localhost on port 8879 to open jupyter. The node_name is found on `jupyter_log/jupyter-notebook-e*.log`
 
 

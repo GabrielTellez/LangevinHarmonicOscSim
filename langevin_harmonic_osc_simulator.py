@@ -234,6 +234,47 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
   fig.update_layout(bargap=0)
   return fig
 
+def plot_quantity(t_array, y_array,
+                  t_range=None, y_range=None,
+                  t_label ='t', y_label=''):
+  """Plots y_array as function of t_array
+
+  Args:
+      t_array (np.array): time axis array of
+      y_array (np.array): quantity to plot array
+      t_range (list, optional): t range. Defaults to Autoscale.
+      y_range (list, optional): y range. Defaults to Autoscale.
+      t_label (str, optional): label for t axis. Defaults to 't'.
+      y_label (str, optional): label for y axis. Defaults to ''.
+
+  Returns:
+      Plotly graphic object: the plot of the quantity
+  """
+  # make figure
+  fig_dict = {
+    "data": [],
+    "layout": {}
+  }
+
+  if t_range == None:
+    xaxis_dict = dict(autorange=True)
+  else:
+    xaxis_dict = dict(range=t_range, autorange=False)
+  if y_range == None:
+    yaxis_dict = dict(autorange=True)
+  else:
+    yaxis_dict = dict(range=y_range, autorange=False)
+  fig_dict["layout"] = go.Layout(
+                        xaxis=xaxis_dict,
+                        yaxis=yaxis_dict,
+                        xaxis_title=t_label,
+                        yaxis_title=y_label )
+  fig_dict["data"].append(
+    go.Scatter(x=t_array, y=y_array, name=y_label)
+  ) 
+  fig=go.Figure(fig_dict)
+  return fig
+
 
 class Simulation:
   """Stores simulation parameters and results. 
@@ -312,7 +353,8 @@ class Simulation:
     self.histogram[quantity]=np.array([np.histogram(self.results[quantity][:,ti], density=True, range=q_range, bins=bins) for ti in range(0,len(self.results["times"]))], dtype=object)
  
   def build_pdf(self, quantity):
-    """Builds the probability density function for a quantity
+    """Builds the probability density function (PDF) for a quantity.
+    The PDF is build and function is defined to access it in self.pdf(quantity)
 
     Args:
         quantity (string): quantity to build its pdf. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
@@ -449,7 +491,68 @@ class Simulation:
     with open(filename, 'rb') as f:
       _sim = pickle.load(f)
     return _sim
-    
+
+  def analyse(self):
+    """Builds all histogram, PDF, averages and variances"""
+    for k in self.result_labels:
+      self.build_histogram(k)
+      self.build_pdf(k)
+      self.build_averages(k)
+      self.build_variances(k)
+
+  def plot_average(self, quantity, 
+                  t_range=None, y_range=None,
+                  t_label ='t', y_label=None  ):
+    """Plots <quantity> as a function of time
+
+    Args:
+        quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Raises:
+        ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Returns:
+        Plotly graphics object: plot of the quantity
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    if quantity not in self.averages:
+      self.build_averages(quantity)
+    if y_label == None:
+      y_label = quantity
+    # make figure
+    fig = plot_quantity(self.results['times'], self.averages[quantity],
+                  t_range=t_range, y_range=y_range,
+                  t_label=t_range, y_label=y_label)
+    return fig
+
+  def plot_variance(self, quantity, 
+                  t_range=None, y_range=None,
+                  t_label ='t', y_label=None):
+    """Plots the variance of quantity as a function of time
+
+    Args:
+        quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Raises:
+        ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Returns:
+        Plotly graphics object: plot of the quantity
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    if quantity not in self.variances:
+      self.build_variances(quantity)
+    if y_label == None:
+      y_label = f'Var({quantity})'
+    # make figure
+    fig = plot_quantity(self.results['times'], self.variances[quantity],
+                  t_range=t_range, y_range=y_range,
+                  t_label=t_range, y_label=y_label)
+    return fig
+
+
 
 class Simulator:
   """Simulator class for Langevin dynamics of a harmonic oscillator with
@@ -512,3 +615,17 @@ class Simulator:
     sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results, name)
     self.simulation.append(sim)
     self.simulations_performed += 1
+
+  def analyse(self, sim_num=None):
+    """Performs the analysis of simulation number sim_num
+
+    Args:
+        sim_num (int, optional): simulation number. Defaults to last
+        simulation preformed.
+    """
+    if sim_num == None:
+      sim_num = self.simulations_performed - 1
+    if sim_num < 0 or sim_num > self.simulations_performed - 1:
+      raise ValueError(f"Simulation number {sim_num} does not exists")
+
+    self.simulation[sim_num].analyse()

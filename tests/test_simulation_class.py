@@ -2,6 +2,7 @@ from ..langevin_harmonic_osc_simulator import Simulation
 import numpy as np
 import pytest
 import os
+import plotly.graph_objects as go
 
 @pytest.fixture
 def dummy_sim():
@@ -391,4 +392,52 @@ def test_str_simulation(dummy_sim):
   ) = dummy_sim
   assert str(sim) == f'Simulation "{sim.name}"'
   
+def test_analyse_simulation(dummy_sim):
+  """Test the analysis of all results of simulation"""
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim
+  sim.analyse()
+  for k in sim.result_labels:
+    assert k in sim.histogram
+    assert k in sim.pdf
+    assert k in sim.averages
+    assert k in sim.average_func
+    assert k in sim.variances 
+    assert k in sim.variance_func
 
+@pytest.mark.parametrize("quantity",
+                        ["x", "power", "work", "heat", "delta_U", "energy"])
+def test_plot_average(dummy_sim, quantity):
+  """Test if a plot of an average is created
+
+  Args:
+      dummy_sim (tuple): simulation data and class
+      quantity (string): quantity to plot the average
+  """
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim 
+  plot = sim.plot_average(quantity)
+  assert(isinstance(plot, go.Figure))
+
+@pytest.mark.parametrize("quantity",
+                        ["x", "power", "work", "heat", "delta_U", "energy"])
+def test_plot_variance(dummy_sim, quantity):
+  """Test if a plot of an variance is created
+
+  Args:
+      dummy_sim (tuple): simulation data and class
+      quantity (string): quantity to plot the variance
+  """
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim 
+  plot = sim.plot_variance(quantity)
+  assert(isinstance(plot, go.Figure))

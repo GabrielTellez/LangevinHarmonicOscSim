@@ -48,6 +48,9 @@ CLASSES
      |  __str__(self)
      |      Return str(self).
      |  
+     |  analyse(self)
+     |      Builds all histogram, PDF, averages and variances
+     |  
      |  animate_pdf(self, quantity, x_range=[-3.0, 3.0], y_range=[0, 1.5], bins=300, show_x_eq_distrib=None)
      |      Shows an animation of the evolution of the PDF of a quantity
      |      
@@ -88,7 +91,8 @@ CLASSES
      |          None for automatic range.
      |  
      |  build_pdf(self, quantity)
-     |      Builds the probability density function for a quantity
+     |      Builds the probability density function (PDF) for a quantity.
+     |      The PDF is build and function is defined to access it in self.pdf(quantity)
      |      
      |      Args:
      |          quantity (string): quantity to build its pdf. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
@@ -115,6 +119,30 @@ CLASSES
      |      Returns:
      |          Simulation: the loaded simulation
      |  
+     |  plot_average(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)
+     |      Plots <quantity> as a function of time
+     |      
+     |      Args:
+     |          quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Raises:
+     |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Returns:
+     |          Plotly graphics object: plot of the quantity
+     |  
+     |  plot_variance(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)
+     |      Plots the variance of quantity as a function of time
+     |      
+     |      Args:
+     |          quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Raises:
+     |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Returns:
+     |          Plotly graphics object: plot of the quantity
+     |  
      |  save(self, filename)
      |      Saves the simulation
      |      
@@ -136,7 +164,7 @@ CLASSES
      |  result_labels = ['x', 'power', 'work', 'heat', 'delta_U', 'energy']
     
     class Simulator(builtins.object)
-     |  Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+     |  Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
      |  
      |  Simulator class for Langevin dynamics of a harmonic oscillator with
      |  variable potential. Encapsulates the simulator, perform
@@ -145,7 +173,7 @@ CLASSES
      |  
      |  Methods defined here:
      |  
-     |  __init__(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+     |  __init__(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
      |      Initializes the Simulator
      |      
      |      Args:
@@ -157,6 +185,13 @@ CLASSES
      |          each snapshot_step time. Defaults to 100.
      |          k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
      |          center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+     |  
+     |  analyse(self, sim_num=None)
+     |      Performs the analysis of simulation number sim_num
+     |      
+     |      Args:
+     |          sim_num (int, optional): simulation number. Defaults to last
+     |          simulation preformed.
      |  
      |  run(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None, name='')
      |      Runs a simulation and store the results
@@ -180,7 +215,7 @@ CLASSES
      |      list of weak references to the object (if defined)
 
 FUNCTIONS
-    animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+    animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
         Plot and animates a simulation data results
         
         Args:
@@ -209,7 +244,7 @@ FUNCTIONS
         Default stiffness for the harmonic potential
         t |--> 1.0
     
-    make_simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x000002DFA730D2D0>, center=<function center at 0x000002DFACCED870>)
+    make_simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
         Makes a numba compiled njit langevin simulator of a brownian
         particle in a harmonic potential with a given stiffness function k and center
         
@@ -225,6 +260,20 @@ FUNCTIONS
         
         Returns:
             njitted function: numba compiled function that performs simulation
+    
+    plot_quantity(t_array, y_array, t_range=None, y_range=None, t_label='t', y_label='')
+        Plots y_array as function of t_array
+        
+        Args:
+            t_array (np.array): time axis array of
+            y_array (np.array): quantity to plot array
+            t_range (list, optional): t range. Defaults to Autoscale.
+            y_range (list, optional): y range. Defaults to Autoscale.
+            t_label (str, optional): label for t axis. Defaults to 't'.
+            y_label (str, optional): label for y axis. Defaults to ''.
+        
+        Returns:
+            Plotly graphic object: the plot of the quantity
 
 
 

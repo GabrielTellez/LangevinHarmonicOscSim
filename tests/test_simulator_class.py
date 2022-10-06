@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from ..langevin_harmonic_osc_simulator import Simulator
 import numpy as np
 import pytest
@@ -93,4 +94,32 @@ def test_run_simulation_store_name():
   simulator.run(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler = noise_scaler, snapshot_step = snapshot_step, name=name)
   assert name == simulator.simulation[0].name
 
+def assert_sim_analysis(sim):
+  """Asserts if a simulation has perfomed its analysis"""
+  for k in sim.result_labels:
+    assert k in sim.histogram
+    assert k in sim.pdf
+    assert k in sim.averages
+    assert k in sim.average_func
+    assert k in sim.variances 
+    assert k in sim.variance_func
 
+def test_analyse_last_simulation():
+  tot_sims = 1000
+  dt = 0.0001
+  tot_steps = 1000
+  noise_scaler = 1
+  snapshot_step = 100
+  name = "test simulation"
+
+  simulator = Simulator()
+  simulator.run(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler = noise_scaler, snapshot_step = snapshot_step, name=name)
+  simulator.analyse()
+  assert_sim_analysis(simulator.simulation[0])
+
+def test_fail_analyse_nonexistent_simulation():
+  """Test failure to analyse a simulation that does not exists"""
+  simulator = Simulator()
+  with pytest.raises(ValueError):
+    simulator.analyse()
+  

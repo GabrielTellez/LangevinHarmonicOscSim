@@ -5,8 +5,9 @@ Python Library Documentation: module langevin_harmonic_osc_simulator
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>langevin_harmonic_osc_simulator</strong></big></big></font></td
-><td align=right valign=bottom
->    <p></p>
+><td align=right valign=bottom></td>
+
+    <p></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -79,6 +80,8 @@ Args:<br>
 
 <dl><dt><a name="Simulation-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
 
+<dl><dt><a name="Simulation-analyse"><strong>analyse</strong></a>(self)</dt><dd><tt>Builds&nbsp;all&nbsp;histogram,&nbsp;PDF,&nbsp;averages&nbsp;and&nbsp;variances</tt></dd></dl>
+
 <dl><dt><a name="Simulation-animate_pdf"><strong>animate_pdf</strong></a>(self, quantity, x_range=[-3.0, 3.0], y_range=[0, 1.5], bins=300, show_x_eq_distrib=None)</dt><dd><tt>Shows&nbsp;an&nbsp;animation&nbsp;of&nbsp;the&nbsp;evolution&nbsp;of&nbsp;the&nbsp;PDF&nbsp;of&nbsp;a&nbsp;quantity<br>
 &nbsp;<br>
 Args:<br>
@@ -115,7 +118,8 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;q_range&nbsp;(list,&nbsp;optional):&nbsp;range&nbsp;for&nbsp;the&nbsp;quantity.&nbsp;Defaults&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;None&nbsp;for&nbsp;automatic&nbsp;range.</tt></dd></dl>
 
-<dl><dt><a name="Simulation-build_pdf"><strong>build_pdf</strong></a>(self, quantity)</dt><dd><tt>Builds&nbsp;the&nbsp;probability&nbsp;density&nbsp;function&nbsp;for&nbsp;a&nbsp;quantity<br>
+<dl><dt><a name="Simulation-build_pdf"><strong>build_pdf</strong></a>(self, quantity)</dt><dd><tt>Builds&nbsp;the&nbsp;probability&nbsp;density&nbsp;function&nbsp;(PDF)&nbsp;for&nbsp;a&nbsp;quantity.<br>
+The&nbsp;PDF&nbsp;is&nbsp;build&nbsp;and&nbsp;function&nbsp;is&nbsp;defined&nbsp;to&nbsp;access&nbsp;it&nbsp;in&nbsp;self.pdf(quantity)<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;build&nbsp;its&nbsp;pdf.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]</tt></dd></dl>
@@ -139,6 +143,28 @@ Args:<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Simulation">Simulation</a>:&nbsp;the&nbsp;loaded&nbsp;simulation</tt></dd></dl>
+
+<dl><dt><a name="Simulation-plot_average"><strong>plot_average</strong></a>(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)</dt><dd><tt>Plots&nbsp;&lt;quantity&gt;&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;plot.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
+
+<dl><dt><a name="Simulation-plot_variance"><strong>plot_variance</strong></a>(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)</dt><dd><tt>Plots&nbsp;the&nbsp;variance&nbsp;of&nbsp;quantity&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;plot.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
 
 <dl><dt><a name="Simulation-save"><strong>save</strong></a>(self, filename)</dt><dd><tt>Saves&nbsp;the&nbsp;simulation<br>
 &nbsp;<br>
@@ -164,7 +190,7 @@ Data and other attributes defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="Simulator">class <strong>Simulator</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Simulator">Simulator</a>(tot_sims=1000,&nbsp;dt=0.001,&nbsp;tot_steps=10000,&nbsp;noise_scaler=1.0,&nbsp;snapshot_step=100,&nbsp;k=&amp;lt;function&nbsp;k&nbsp;at&nbsp;0x000002DFA730D2D0&amp;gt;,&nbsp;center=&amp;lt;function&nbsp;center&nbsp;at&nbsp;0x000002DFACCED870&amp;gt;)<br>
+<td colspan=2><tt><a href="#Simulator">Simulator</a>(tot_sims=1000,&nbsp;dt=0.001,&nbsp;tot_steps=10000,&nbsp;noise_scaler=1.0,&nbsp;snapshot_step=100,&nbsp;k=&amp;lt;function&nbsp;k&nbsp;at&nbsp;0x0000025AD892D3F0&amp;gt;,&nbsp;center=&amp;lt;function&nbsp;center&nbsp;at&nbsp;0x0000025ADE341990&amp;gt;)<br>
 &nbsp;<br>
 <a href="#Simulator">Simulator</a>&nbsp;class&nbsp;for&nbsp;Langevin&nbsp;dynamics&nbsp;of&nbsp;a&nbsp;harmonic&nbsp;oscillator&nbsp;with<br>
 variable&nbsp;potential.&nbsp;Encapsulates&nbsp;the&nbsp;simulator,&nbsp;perform<br>
@@ -172,7 +198,7 @@ simulations,&nbsp;analyses&nbsp;them&nbsp;and&nbsp;store&nbsp;results<br>
 of&nbsp;simulation<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Simulator-__init__"><strong>__init__</strong></a>(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x000002DFA730D2D0&gt;, center=&lt;function center at 0x000002DFACCED870&gt;)</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulator">Simulator</a><br>
+<dl><dt><a name="Simulator-__init__"><strong>__init__</strong></a>(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x0000025AD892D3F0&gt;, center=&lt;function center at 0x0000025ADE341990&gt;)</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulator">Simulator</a><br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int,&nbsp;optional):&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.&nbsp;Defaults&nbsp;to&nbsp;1000.<br>
@@ -183,6 +209,12 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;snapshot_step&nbsp;time.&nbsp;Defaults&nbsp;to&nbsp;100.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;<a href="#-k">k</a>(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.</tt></dd></dl>
+
+<dl><dt><a name="Simulator-analyse"><strong>analyse</strong></a>(self, sim_num=None)</dt><dd><tt>Performs&nbsp;the&nbsp;analysis&nbsp;of&nbsp;simulation&nbsp;number&nbsp;sim_num<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sim_num&nbsp;(int,&nbsp;optional):&nbsp;simulation&nbsp;number.&nbsp;Defaults&nbsp;to&nbsp;last<br>
+&nbsp;&nbsp;&nbsp;&nbsp;simulation&nbsp;preformed.</tt></dd></dl>
 
 <dl><dt><a name="Simulator-run"><strong>run</strong></a>(self, tot_sims=None, dt=None, tot_steps=None, noise_scaler=None, snapshot_step=None, name='')</dt><dd><tt>Runs&nbsp;a&nbsp;simulation&nbsp;and&nbsp;store&nbsp;the&nbsp;results<br>
 &nbsp;<br>
@@ -210,7 +242,7 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-animate_simulation"><strong>animate_simulation</strong></a>(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=&lt;function k at 0x000002DFA730D2D0&gt;, center=&lt;function center at 0x000002DFACCED870&gt;)</dt><dd><tt>Plot&nbsp;and&nbsp;animates&nbsp;a&nbsp;simulation&nbsp;data&nbsp;results<br>
+<td width="100%"><dl><dt><a name="-animate_simulation"><strong>animate_simulation</strong></a>(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=&lt;function k at 0x0000025AD892D3F0&gt;, center=&lt;function center at 0x0000025ADE341990&gt;)</dt><dd><tt>Plot&nbsp;and&nbsp;animates&nbsp;a&nbsp;simulation&nbsp;data&nbsp;results<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;times&nbsp;(list&nbsp;of&nbsp;float):&nbsp;list&nbsp;of&nbsp;times&nbsp;where&nbsp;snapshots&nbsp;where&nbsp;taken<br>
@@ -233,7 +265,7 @@ Returns:<br>
 t&nbsp;|--&gt;&nbsp;0.0</tt></dd></dl>
  <dl><dt><a name="-k"><strong>k</strong></a>(t)</dt><dd><tt>Default&nbsp;stiffness&nbsp;for&nbsp;the&nbsp;harmonic&nbsp;potential<br>
 t&nbsp;|--&gt;&nbsp;1.0</tt></dd></dl>
- <dl><dt><a name="-make_simulator"><strong>make_simulator</strong></a>(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x000002DFA730D2D0&gt;, center=&lt;function center at 0x000002DFACCED870&gt;)</dt><dd><tt>Makes&nbsp;a&nbsp;numba&nbsp;compiled&nbsp;njit&nbsp;langevin&nbsp;simulator&nbsp;of&nbsp;a&nbsp;brownian<br>
+ <dl><dt><a name="-make_simulator"><strong>make_simulator</strong></a>(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x0000025AD892D3F0&gt;, center=&lt;function center at 0x0000025ADE341990&gt;)</dt><dd><tt>Makes&nbsp;a&nbsp;numba&nbsp;compiled&nbsp;njit&nbsp;langevin&nbsp;simulator&nbsp;of&nbsp;a&nbsp;brownian<br>
 particle&nbsp;in&nbsp;a&nbsp;harmonic&nbsp;potential&nbsp;with&nbsp;a&nbsp;given&nbsp;stiffness&nbsp;function&nbsp;k&nbsp;and&nbsp;center<br>
 &nbsp;<br>
 Args:<br>
@@ -248,4 +280,16 @@ Args:<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;njitted&nbsp;function:&nbsp;numba&nbsp;compiled&nbsp;function&nbsp;that&nbsp;performs&nbsp;simulation</tt></dd></dl>
+ <dl><dt><a name="-plot_quantity"><strong>plot_quantity</strong></a>(t_array, y_array, t_range=None, y_range=None, t_label='t', y_label='')</dt><dd><tt>Plots&nbsp;y_array&nbsp;as&nbsp;function&nbsp;of&nbsp;t_array<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_array&nbsp;(np.array):&nbsp;time&nbsp;axis&nbsp;array&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_array&nbsp;(np.array):&nbsp;quantity&nbsp;to&nbsp;plot&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_range&nbsp;(list,&nbsp;optional):&nbsp;t&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_range&nbsp;(list,&nbsp;optional):&nbsp;y&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;t&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;'t'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;y&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;''.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphic&nbsp;<a href="builtins.html#object">object</a>:&nbsp;the&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
 </td></tr></table>
