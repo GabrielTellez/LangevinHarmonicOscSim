@@ -1,6 +1,7 @@
 from ..langevin_harmonic_osc_simulator import make_simulator
 import numpy as np
 from pytest import approx
+import pytest
 
 def test_make_simulator():
   """
@@ -110,3 +111,27 @@ def test_energy_conservation_variable_potential():
   for time_index in range(0, len(times)):
     assert delta_U[:, time_index] - (work[:, time_index] + heat[:, time_index]) == approx(0.0)
     assert delta_U[:, time_index] - (energy[:, time_index] - energy[:, 0]) == approx(0.0)
+
+def test_general_force():
+  """Tests the simulator for a non harmonic force
+  """
+  def f(x,t):
+    return 1.0
+  with pytest.raises(ValueError):
+    # This will fail if the potential is not provided
+    simulator = make_simulator(harmonic_potential=False, force=f)
+    times, x, power, work, heat, delta_U, energy = simulator()
+
+def test_general_potential():
+  """Tests the simulator for a non harmonic potential
+  """
+  def U(x,t):
+    return -1.0*x
+  simulator = make_simulator(harmonic_potential=False, potential=U)
+  times, x, power, work, heat, delta_U, energy = simulator()
+
+
+
+
+
+

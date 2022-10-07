@@ -123,3 +123,49 @@ def test_fail_analyse_nonexistent_simulation():
   with pytest.raises(ValueError):
     simulator.analyse()
   
+
+def test_constant_force_without_force_or_potential():
+  with pytest.raises(ValueError):
+    # Should raise an error if the force and the potential are not provided
+    simulator = Simulator(harmonic_potential=False)
+
+def test_constant_force_average_x():
+  """Tests that if the force f is constant then
+  <x(t)> = f t + <x(0)>
+  and
+  Var(x(t)) = 2 t
+  """
+  def f(x,t):
+    return 1.0
+  def U(x,t):
+    return -1.0*x
+  tot_sims=100000
+  simulator = Simulator(tot_sims=tot_sims, harmonic_potential=False, force=f, potential=U)
+  simulator.run()
+  sim=simulator.simulation[0]
+  sim.build_averages('x')
+  tol = 4.7/np.sqrt(tot_sims)
+  for t in sim.results['times']:
+    var = np.sqrt(2.0*t)
+    assert sim.average_func['x'](t) == pytest.approx(1.0*t, abs=var*tol), f"average position not equal at time t={t}"
+  
+def test_constant_force_variance_x():
+  """Tests the variance when the force f is constant:
+  <x(t)> = f t + <x(0)>
+  and
+  Var(x(t)) = 2 t
+  """
+  def f(x,t):
+    return 1.0
+  def U(x,t):
+    return -1.0*x
+  tot_sims=100000
+  simulator = Simulator(tot_sims=tot_sims, harmonic_potential=False, force=f, potential=U)
+  simulator.run()
+  sim=simulator.simulation[0]
+  sim.build_variances('x')
+  tol = 4.7/np.sqrt(tot_sims)
+  for t in sim.results['times']:
+    var = np.sqrt(3*4.0*t)
+    assert sim.variance_func['x'](t) == pytest.approx(2.0*t, abs=var*tol), f"variance position not equal at time t={t}"
+  

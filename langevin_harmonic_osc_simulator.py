@@ -5,20 +5,12 @@ import numba as nb
 import cloudpickle
 import pickle
 
-
-def k(t):
-  """Default stiffness for the harmonic potential
-    t |--> 1.0
-  """
-  return 1.0
-def center(t):
-  """Default center for the harmonic potential
-    t |--> 0.0
-  """
-  return 0.0
-def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1.0, snapshot_step=100, k=k, center=center):
+def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1.0, snapshot_step=100,
+                  k=None, center=None,
+                  harmonic_potential=True,
+                  force=None, potential=None):
   """Makes a numba compiled njit langevin simulator of a brownian
-  particle in a harmonic potential with a given stiffness function k and center
+  particle in an external time variable potential or force 
 
   Args:
       tot_sims (int, optional): default total number of simulations. Defaults to 1000.
@@ -33,16 +25,62 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
   Returns:
       njitted function: numba compiled function that performs simulation 
   """
-  k = nb.njit(k)
-  center = nb.njit(center)
-  @nb.njit
-  def f(x,t):
-    """ Force on the particle"""
-    return -k(t)*(x-center(t))
-  @nb.njit
-  def U(x,t):
-    """ Harmonic potential energy"""
-    return 0.5*k(t)*(x-center(t))*(x-center(t))
+  if harmonic_potential:
+    if k == None:
+      def k(t):
+        """Default stiffness for the harmonic potential
+          t |--> 1.0
+        """
+        return 1.0
+    if center == None:
+      def center(t):
+        """Default center for the harmonic potential
+          t |--> 0.0
+        """
+        return 0.0
+    k = nb.njit(k)
+    center = nb.njit(center)
+    @nb.njit
+    def f(x,t):
+      """ Force on the particle"""
+      return -k(t)*(x-center(t))
+    @nb.njit
+    def U(x,t):
+      """ Harmonic potential energy"""
+      return 0.5*k(t)*(x-center(t))*(x-center(t))
+  else:
+    # In general force mode
+    # check that the force or the potential are defined
+    if force == None and potential == None:
+      raise ValueError("In general force mode, the force or the potential have to be provided. Both cannot be None")    
+    if force == None:
+      # We need to compute the force from the potential
+      U=nb.njit(potential)
+      def force(x,t):
+        dx=1E-9
+        return -(U(x+dx,t)-U(x,t))/dt
+    if potential == None:
+      raise ValueError("In general force mode, the potential have to be provided. It is too slow to compute it from the force.")    
+      # We need the potential from the force
+      # this will never run:
+      f=nb.njit(force)
+      def potential(x,t):
+        # Integral by basic numerical quadrature trapezoidal rule
+        # This is way too slow
+        dx=1E-6
+        x0=0.0
+        xs = np.arange(x0+dx, x-dx, dx)
+        integral=0.5*(f(x0,t)+f(x,t))
+        for xp in xs:
+          integral += f(xp,t)
+        integral = integral*dx 
+        return integral
+      
+    # To do : test if potential and force are coherent
+    ####
+    f=nb.njit(force)
+    U=nb.njit(potential)
+
   @nb.njit
   def one_simulation(dt=dt, tot_steps=tot_steps, xinit=0.0, noise_scaler=noise_scaler, snapshot_step=snapshot_step):
     """Function that performs one simulation
@@ -94,6 +132,20 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
             energy[snapshot_index] = U(xnew,t+dt)
         xold=xnew
     return x, power, work, heat, delta_U, energy
+
+  @nb.njit
+  def initial_distribution():
+    """Samples initial position according to the equilibrium distribution
+
+    Returns:
+        float: x random sample distributed according to exp(-U(x,0))
+    """
+    if harmonic_potential:
+      return np.random.normal(center(0.0), scale=np.sqrt(1.0/k(0.0)))
+    else:
+      # To be implemented, see inverse transform sampling
+      return 0.0
+
   @nb.jit(parallel=True)
   def many_sims_parallel(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler = noise_scaler, snapshot_step = snapshot_step):
     """Function that performs many simulations with initial condition at
@@ -124,12 +176,12 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
     times=np.arange(0, (1+tot_steps)*dt, dt*snapshot_step)
     for sim_num in nb.prange(tot_sims):
         # initial position taken from equilibrium distribution at t=0
-        xinit = np.random.normal(center(0.0), scale=np.sqrt(1.0/k(0.0)))
+        xinit = initial_distribution()
         x[sim_num], power[sim_num], work[sim_num], heat[sim_num], delta_U[sim_num], energy[sim_num] = one_simulation(dt=dt, tot_steps=tot_steps, xinit=xinit, noise_scaler=noise_scaler, snapshot_step=snapshot_step)
     return times, x, power, work, heat, delta_U, energy
   return many_sims_parallel
 
-def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=k, center=center):
+def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=None, center=None):
   """Plot and animates a simulation data results
 
   Args:
@@ -150,8 +202,21 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
   Returns:
       Plotly graphics object: animation of the simulation data
   """
+  if k == None:
+    def k(t):
+      """Default stiffness for the harmonic potential
+        t |--> 1.0
+      """
+      return 1.0
+  if center == None:
+    def center(t):
+      """Default center for the harmonic potential
+        t |--> 0.0
+      """
+      return 0.0
   xx=np.linspace(*x_range, 1000)
   histos=[np.histogram(xst[:,ti], density=True, range=x_range, bins=bins) for ti in range(0,len(times))]
+  # To do: plot general PDF exp(-U(x,t))
   b=[np.exp(-0.5*k(t)*(xx-center(t))**2)/np.sqrt(2*np.pi/k(t)) for t in times]
   # make figure
   fig_dict = {
@@ -560,7 +625,9 @@ class Simulator:
   simulations, analyses them and store results
   of simulation 
   """
-  def __init__(self, tot_sims = 1000, dt = 0.001, tot_steps = 10000, noise_scaler=1.0, snapshot_step=100, k=k, center=center):
+  def __init__(self, tot_sims = 1000, dt = 0.001, tot_steps = 10000, noise_scaler=1.0, snapshot_step=100,
+              k=None, center=None, harmonic_potential = True,
+              force = None, potential = None):
     """Initializes the Simulator
 
     Args:
@@ -572,8 +639,34 @@ class Simulator:
         each snapshot_step time. Defaults to 100.
         k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
         center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+        harmonic_potential (boolean, optional): it True: the external potential
+          is harmonic with stiffness k(t) and center(t).
+          If False the external force is given by the force argument or
+          the the external potential is given by potential argument
+        force (float function(x,t), optional): the external force
+        potential (float function(x,t), optional): the external potential
     """
+    if harmonic_potential:
+      if k == None:
+        def k(t):
+          """Default stiffness for the harmonic potential
+            t |--> 1.0
+          """
+          return 1.0
+      if center == None:
+        def center(t):
+          """Default center for the harmonic potential
+            t |--> 0.0
+          """
+          return 0.0
+      def force(x,t):
+        """ Force on the particle"""
+        return -k(t)*(x-center(t))
 
+      def potential(x,t):
+        """ Harmonic potential energy"""
+        return 0.5*k(t)*(x-center(t))*(x-center(t))
+    
     # store the default parameters for simulations
     self.tot_sims = tot_sims
     self.dt = dt
@@ -582,8 +675,12 @@ class Simulator:
     self.snapshot_step = snapshot_step
     self.k = k
     self.center = center
-    self.simulator = make_simulator(tot_sims=tot_sims, dt=dt, tot_steps=tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center)
-
+    self.harmonic_potential = harmonic_potential
+    self.force = force
+    self.potential = potential
+    self.simulator = make_simulator(tot_sims=tot_sims, dt=dt, tot_steps=tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center, 
+                                    harmonic_potential=harmonic_potential,
+                                    force=force, potential=potential)
     self.simulations_performed = 0
     # list of Simulations classes to store results of simulations
     self.simulation = []
