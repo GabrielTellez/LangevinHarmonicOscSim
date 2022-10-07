@@ -139,15 +139,17 @@ def test_constant_force_average_x():
     return 1.0
   def U(x,t):
     return -1.0*x
+  def initial_condition():
+    return -1.0
   tot_sims=100000
-  simulator = Simulator(tot_sims=tot_sims, harmonic_potential=False, force=f, potential=U)
+  simulator = Simulator(tot_sims=tot_sims, harmonic_potential=False, force=f, potential=U, initial_distribution=initial_condition)
   simulator.run()
   sim=simulator.simulation[0]
   sim.build_averages('x')
   tol = 4.7/np.sqrt(tot_sims)
   for t in sim.results['times']:
     var = np.sqrt(2.0*t)
-    assert sim.average_func['x'](t) == pytest.approx(1.0*t, abs=var*tol), f"average position not equal at time t={t}"
+    assert sim.average_func['x'](t) == pytest.approx(1.0*t+initial_condition(), abs=var*tol), f"average position not equal at time t={t}"
   
 def test_constant_force_variance_x():
   """Tests the variance when the force f is constant:
@@ -159,13 +161,15 @@ def test_constant_force_variance_x():
     return 1.0
   def U(x,t):
     return -1.0*x
+  def initial_condition():
+    return 0.0
   tot_sims=100000
-  simulator = Simulator(tot_sims=tot_sims, harmonic_potential=False, force=f, potential=U)
+  simulator = Simulator(tot_sims=tot_sims, harmonic_potential=False, force=f, potential=U, initial_distribution=initial_condition)
   simulator.run()
   sim=simulator.simulation[0]
   sim.build_variances('x')
   tol = 4.7/np.sqrt(tot_sims)
   for t in sim.results['times']:
-    var = np.sqrt(3*4.0*t)
+    var = np.sqrt(3)*2.0*t
     assert sim.variance_func['x'](t) == pytest.approx(2.0*t, abs=var*tol), f"variance position not equal at time t={t}"
   

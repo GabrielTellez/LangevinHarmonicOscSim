@@ -8,7 +8,8 @@ import pickle
 def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1.0, snapshot_step=100,
                   k=None, center=None,
                   harmonic_potential=True,
-                  force=None, potential=None):
+                  force=None, potential=None,
+                  initial_distribution = None):
   """Makes a numba compiled njit langevin simulator of a brownian
   particle in an external time variable potential or force 
 
@@ -48,6 +49,21 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
     def U(x,t):
       """ Harmonic potential energy"""
       return 0.5*k(t)*(x-center(t))*(x-center(t))
+    if initial_distribution == None:
+      @nb.njit
+      def initial_distribution():
+        """Samples initial position according to the equilibrium distribution
+
+        Returns:
+            float: x random sample distributed according to exp(-k(0)*(x-center(0)**2/2))
+        """
+        return np.random.normal(center(0.0), scale=np.sqrt(1.0/k(0.0)))
+        # To be implemented for non harmonic potential,
+        # see inverse transform sampling
+        # Challenge: it has to be numba njittable.
+    else:
+      initial_distribution=nb.njit(initial_distribution)
+
   else:
     # In general force mode
     # check that the force or the potential are defined
@@ -75,11 +91,14 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
           integral += f(xp,t)
         integral = integral*dx 
         return integral
-      
+    if initial_distribution == None:
+      raise ValueError('In general force mode the initial distribution has to be provided')
+
     # To do : test if potential and force are coherent
     ####
     f=nb.njit(force)
     U=nb.njit(potential)
+    initial_distribution=nb.njit(initial_distribution)
 
   @nb.njit
   def one_simulation(dt=dt, tot_steps=tot_steps, xinit=0.0, noise_scaler=noise_scaler, snapshot_step=snapshot_step):
@@ -133,19 +152,6 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
         xold=xnew
     return x, power, work, heat, delta_U, energy
 
-  @nb.njit
-  def initial_distribution():
-    """Samples initial position according to the equilibrium distribution
-
-    Returns:
-        float: x random sample distributed according to exp(-U(x,0))
-    """
-    if harmonic_potential:
-      return np.random.normal(center(0.0), scale=np.sqrt(1.0/k(0.0)))
-    else:
-      # To be implemented, see inverse transform sampling
-      return 0.0
-
   @nb.jit(parallel=True)
   def many_sims_parallel(tot_sims = tot_sims, dt = dt, tot_steps = tot_steps, noise_scaler = noise_scaler, snapshot_step = snapshot_step):
     """Function that performs many simulations with initial condition at
@@ -175,11 +181,13 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
     energy = np.zeros_like(x)
     times=np.arange(0, (1+tot_steps)*dt, dt*snapshot_step)
     for sim_num in nb.prange(tot_sims):
-        # initial position taken from equilibrium distribution at t=0
+        # initial position taken from a given initial_distribution
         xinit = initial_distribution()
         x[sim_num], power[sim_num], work[sim_num], heat[sim_num], delta_U[sim_num], energy[sim_num] = one_simulation(dt=dt, tot_steps=tot_steps, xinit=xinit, noise_scaler=noise_scaler, snapshot_step=snapshot_step)
     return times, x, power, work, heat, delta_U, energy
   return many_sims_parallel
+
+################################################################################
 
 def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=None, center=None):
   """Plot and animates a simulation data results
@@ -299,6 +307,8 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
   fig.update_layout(bargap=0)
   return fig
 
+################################################################################
+
 def plot_quantity(t_array, y_array,
                   t_range=None, y_range=None,
                   t_label ='t', y_label=''):
@@ -340,6 +350,7 @@ def plot_quantity(t_array, y_array,
   fig=go.Figure(fig_dict)
   return fig
 
+################################################################################
 
 class Simulation:
   """Stores simulation parameters and results. 
@@ -617,7 +628,7 @@ class Simulation:
                   t_label=t_range, y_label=y_label)
     return fig
 
-
+##################################################################################
 
 class Simulator:
   """Simulator class for Langevin dynamics of a harmonic oscillator with
@@ -627,7 +638,7 @@ class Simulator:
   """
   def __init__(self, tot_sims = 1000, dt = 0.001, tot_steps = 10000, noise_scaler=1.0, snapshot_step=100,
               k=None, center=None, harmonic_potential = True,
-              force = None, potential = None):
+              force = None, potential = None, initial_distribution=None):
     """Initializes the Simulator
 
     Args:
@@ -645,7 +656,12 @@ class Simulator:
           the the external potential is given by potential argument
         force (float function(x,t), optional): the external force
         potential (float function(x,t), optional): the external potential
+        initial_distribution (float function(), optional): initial
+          condition for x(0). Default: for harmonic oscillator, sampled
+          from equilibrium distribution exp(-k(0)(x-center(0)**2/2).
+          Have to be provided for general potential if harmonic_potential=False
     """
+    initial_distribution_not_compiled = initial_distribution
     if harmonic_potential:
       if k == None:
         def k(t):
@@ -666,7 +682,14 @@ class Simulator:
       def potential(x,t):
         """ Harmonic potential energy"""
         return 0.5*k(t)*(x-center(t))*(x-center(t))
-    
+      if initial_distribution_not_compiled == None:
+        def initial_distribution_not_compiled():
+          """Samples initial position according to the equilibrium distribution
+          Returns:
+              float: x random sample distributed according to exp(-k(0)*(x-center(0)**2/2))
+          """
+          return np.random.normal(center(0.0), scale=np.sqrt(1.0/k(0.0)))
+     
     # store the default parameters for simulations
     self.tot_sims = tot_sims
     self.dt = dt
@@ -678,9 +701,10 @@ class Simulator:
     self.harmonic_potential = harmonic_potential
     self.force = force
     self.potential = potential
+    self.initial_distribution = initial_distribution_not_compiled
     self.simulator = make_simulator(tot_sims=tot_sims, dt=dt, tot_steps=tot_steps, noise_scaler=noise_scaler, snapshot_step=snapshot_step, k=k, center=center, 
                                     harmonic_potential=harmonic_potential,
-                                    force=force, potential=potential)
+                                    force=force, potential=potential, initial_distribution=initial_distribution)
     self.simulations_performed = 0
     # list of Simulations classes to store results of simulations
     self.simulation = []

@@ -127,7 +127,9 @@ def test_general_potential():
   """
   def U(x,t):
     return -1.0*x
-  simulator = make_simulator(harmonic_potential=False, potential=U)
+  def init_cond():
+    return 0.0
+  simulator = make_simulator(harmonic_potential=False, potential=U, initial_distribution=init_cond)
   times, x, power, work, heat, delta_U, energy = simulator()
 
 
