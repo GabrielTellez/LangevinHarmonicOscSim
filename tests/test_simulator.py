@@ -132,6 +132,22 @@ def test_general_potential():
   simulator = make_simulator(harmonic_potential=False, potential=U, initial_distribution=init_cond)
   times, x, power, work, heat, delta_U, energy = simulator()
 
+def test_nonconsistent_force_and_potential():
+  """Tests if an error is raised when the potential U and the force f are
+  non consistent: f not equal to -grad U
+  """
+  def f(x,t):
+    return 1.0
+  def U(x,t):
+    return x**2
+  def init_cond():
+    return 0.0
+  with pytest.raises(ValueError):
+    # This should fail 
+    simulator = make_simulator(harmonic_potential=False, force=f, potential=U, initial_distribution=init_cond)
+    times, x, power, work, heat, delta_U, energy = simulator()
+
+
 
 
 

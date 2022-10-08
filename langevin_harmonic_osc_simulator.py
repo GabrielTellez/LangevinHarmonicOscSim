@@ -1,3 +1,4 @@
+from statistics import harmonic_mean
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
@@ -74,7 +75,7 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
       U=nb.njit(potential)
       def force(x,t):
         dx=1E-9
-        return -(U(x+dx,t)-U(x,t))/dt
+        return -(U(x+dx,t)-U(x,t))/dx
     if potential == None:
       raise ValueError("In general force mode, the potential have to be provided. It is too slow to compute it from the force.")    
       # We need the potential from the force
@@ -93,12 +94,18 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
         return integral
     if initial_distribution == None:
       raise ValueError('In general force mode the initial distribution has to be provided')
+    initial_distribution=nb.njit(initial_distribution)
 
-    # To do : test if potential and force are coherent
-    ####
     f=nb.njit(force)
     U=nb.njit(potential)
-    initial_distribution=nb.njit(initial_distribution)
+    # Test if potential and force are coherent
+    dx=1E-9
+    xx=np.linspace(-10.0,10.0,100)
+    tt=np.linspace(0.0,10.0,100)
+    ff=[f(xx,t) for t in tt]
+    minusgradU=[(U(xx,t)-U(xx+dx,t))/dx for t in tt]
+    if not np.allclose(ff, minusgradU):
+      raise ValueError("Force and potential are nonconsistent: Force is different from minus grad potential")
 
   @nb.njit
   def one_simulation(dt=dt, tot_steps=tot_steps, xinit=0.0, noise_scaler=noise_scaler, snapshot_step=snapshot_step):
@@ -189,7 +196,9 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
 
 ################################################################################
 
-def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=None, center=None):
+def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', 
+                       show_x_eq_distrib=True, k=None, center=None,
+                       harmonic_potential=True, potential=None):
   """Plot and animates a simulation data results
 
   Args:
@@ -206,7 +215,8 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
         and stiffness k(t). Defaults to True.
       k (float function, optional): stiffness function of the potential. Defaults to k(t)=1.0.
       center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
-
+      harmonic_potential: True if working with a harmonic potential
+      potential: potential energy to use when harmonic_potential=False
   Returns:
       Plotly graphics object: animation of the simulation data
   """
@@ -222,10 +232,22 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
         t |--> 0.0
       """
       return 0.0
-  xx=np.linspace(*x_range, 1000)
+  if not harmonic_potential and potential == None and show_x_eq_distrib:
+    raise ValueError('Cannot show the equilibrium distribution if the potential is not provided in general force mode.')
+  num_points = 1000
+  xx=np.linspace(*x_range, num_points)
   histos=[np.histogram(xst[:,ti], density=True, range=x_range, bins=bins) for ti in range(0,len(times))]
   # To do: plot general PDF exp(-U(x,t))
-  b=[np.exp(-0.5*k(t)*(xx-center(t))**2)/np.sqrt(2*np.pi/k(t)) for t in times]
+  if harmonic_potential:
+    b=[np.exp(-0.5*k(t)*(xx-center(t))**2)/np.sqrt(2*np.pi/k(t)) for t in times]
+  else:
+    # Un-normalized Boltzmann factor
+    b=[np.exp(-potential(xx,t)) for t in times]
+    # Normalize the PDF
+    norm=np.linalg.norm(b, axis=1, ord=1)
+    dx = np.abs(x_range[1]-x_range[0])/num_points
+    norm = norm*dx 
+    b=b/norm[:,None]
   # make figure
   fig_dict = {
       "data": [],
@@ -358,7 +380,8 @@ class Simulation:
   work, etc..)
   """
   result_labels = ["x", "power", "work", "heat", "delta_U", "energy"]
-  def __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name=""):
+  def __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name="",
+               harmonic_potential=True, force=None, potential=None):
     """Initializes the Simulation class with parameters and raw results
 
     Args:
@@ -385,6 +408,12 @@ class Simulation:
           energy (ndarray of shape (tot_sims, tot_snapshots)):
           energy[sim][ts] in simulation sim at snapshot ts 
         name (string, optional): name of the simulation
+        harmonic_potential(boolean, optional): True if the potential is harmonic
+        force (float function(x,t), optional): force when the potential
+          is not harmonic
+        potential (float function(x,t), optional): potential when the potential
+          is not harmonic
+
     """
     self.tot_sims = tot_sims
     self.dt = dt
@@ -394,6 +423,9 @@ class Simulation:
     self.name = name
     self.k = k 
     self.center = center 
+    self.harmonic_potential = harmonic_potential
+    self.force = force
+    self.potential = potential 
 
     (times, x, power, work, heat, delta_U, energy) = results
     self.results = {
@@ -544,7 +576,9 @@ class Simulation:
                        bins=bins, 
                        x_label=quantity, y_label=f'P({quantity},t)', 
                        show_x_eq_distrib=show_x_eq_distrib, 
-                       k=self.k, center=self.center)
+                       k=self.k, center=self.center,
+                       harmonic_potential=self.harmonic_potential,
+                       potential=self.potential)
 
   def save(self, filename):
     """Saves the simulation
@@ -733,7 +767,8 @@ class Simulator:
       snapshot_step = self.snapshot_step
 
     results = self.simulator(tot_sims, dt, tot_steps, noise_scaler, snapshot_step)
-    sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results, name)
+    sim = Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, self.k, self.center, results, name,
+                    harmonic_potential=self.harmonic_potential, force=self.force, potential=self.potential)
     self.simulation.append(sim)
     self.simulations_performed += 1
 
