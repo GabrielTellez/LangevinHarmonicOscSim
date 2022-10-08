@@ -59,9 +59,6 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
             float: x random sample distributed according to exp(-k(0)*(x-center(0)**2/2))
         """
         return np.random.normal(center(0.0), scale=np.sqrt(1.0/k(0.0)))
-        # To be implemented for non harmonic potential,
-        # see inverse transform sampling
-        # Challenge: it has to be numba njittable.
     else:
       initial_distribution=nb.njit(initial_distribution)
 
@@ -94,6 +91,10 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
         return integral
     if initial_distribution == None:
       raise ValueError('In general force mode the initial distribution has to be provided')
+      # P(x) = exp(-U(x,0))/Z(0) :
+      # To be implemented for non harmonic potential,
+      # see inverse transform sampling
+      # Challenge: it has to be numba njittable.
     initial_distribution=nb.njit(initial_distribution)
 
     f=nb.njit(force)
