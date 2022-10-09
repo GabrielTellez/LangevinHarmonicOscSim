@@ -9,7 +9,7 @@ CLASSES
         Simulator
     
     class Simulation(builtins.object)
-     |  Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+     |  Simulation(tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='', harmonic_potential=True, force=None, potential=None)
      |  
      |  Stores simulation parameters and results. 
      |  Analyses the results: builds PDF of the simulation results (position,
@@ -17,7 +17,7 @@ CLASSES
      |  
      |  Methods defined here:
      |  
-     |  __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')
+     |  __init__(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='', harmonic_potential=True, force=None, potential=None)
      |      Initializes the Simulation class with parameters and raw results
      |      
      |      Args:
@@ -44,6 +44,11 @@ CLASSES
      |            energy (ndarray of shape (tot_sims, tot_snapshots)):
      |            energy[sim][ts] in simulation sim at snapshot ts 
      |          name (string, optional): name of the simulation
+     |          harmonic_potential(boolean, optional): True if the potential is harmonic
+     |          force (float function(x,t), optional): force when the potential
+     |            is not harmonic
+     |          potential (float function(x,t), optional): potential when the potential
+     |            is not harmonic
      |  
      |  __str__(self)
      |      Return str(self).
@@ -66,7 +71,7 @@ CLASSES
      |          ValueError: quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
      |      
      |      Returns:
-     |          Plotly graphics object: animation of the PDF
+     |          plotly.graph_objects.figure: animation of the PDF
      |  
      |  build_averages(self, quantity)
      |      Computes the average of a quantity. 
@@ -129,7 +134,7 @@ CLASSES
      |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
      |      
      |      Returns:
-     |          Plotly graphics object: plot of the quantity
+     |          plotly.graph_objects.figure: plot of the quantity
      |  
      |  plot_variance(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)
      |      Plots the variance of quantity as a function of time
@@ -141,7 +146,7 @@ CLASSES
      |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
      |      
      |      Returns:
-     |          Plotly graphics object: plot of the quantity
+     |          plotly.graph_objects.figure: plot of the quantity
      |  
      |  save(self, filename)
      |      Saves the simulation
@@ -164,7 +169,7 @@ CLASSES
      |  result_labels = ['x', 'power', 'work', 'heat', 'delta_U', 'energy']
     
     class Simulator(builtins.object)
-     |  Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
+     |  Simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=None, center=None, harmonic_potential=True, force=None, potential=None, initial_distribution=None)
      |  
      |  Simulator class for Langevin dynamics of a harmonic oscillator with
      |  variable potential. Encapsulates the simulator, perform
@@ -173,7 +178,7 @@ CLASSES
      |  
      |  Methods defined here:
      |  
-     |  __init__(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
+     |  __init__(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=None, center=None, harmonic_potential=True, force=None, potential=None, initial_distribution=None)
      |      Initializes the Simulator
      |      
      |      Args:
@@ -185,6 +190,16 @@ CLASSES
      |          each snapshot_step time. Defaults to 100.
      |          k (float function, optional): stiffness function k(t) of the potential. Defaults to k(t)=1.0.
      |          center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+     |          harmonic_potential (boolean, optional): it True: the external potential
+     |            is harmonic with stiffness k(t) and center(t).
+     |            If False the external force is given by the force argument or
+     |            the the external potential is given by potential argument
+     |          force (float function(x,t), optional): the external force
+     |          potential (float function(x,t), optional): the external potential
+     |          initial_distribution (float function(), optional): initial
+     |            condition for x(0). Default: for harmonic oscillator, sampled
+     |            from equilibrium distribution exp(-k(0)(x-center(0)**2/2).
+     |            Have to be provided for general potential if harmonic_potential=False
      |  
      |  analyse(self, sim_num=None)
      |      Performs the analysis of simulation number sim_num
@@ -215,7 +230,7 @@ CLASSES
      |      list of weak references to the object (if defined)
 
 FUNCTIONS
-    animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
+    animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=None, center=None, harmonic_potential=True, potential=None)
         Plot and animates a simulation data results
         
         Args:
@@ -232,21 +247,34 @@ FUNCTIONS
               and stiffness k(t). Defaults to True.
             k (float function, optional): stiffness function of the potential. Defaults to k(t)=1.0.
             center (float function, optional): center function of the potential. Defaults to center(t)=0.0.
+            harmonic_potential: True if working with a harmonic potential
+            potential: potential energy to use when harmonic_potential=False
+        Returns:
+            plotly.graph_objects.figure: animation of the simulation data
+    
+    make_sampler(pdf, range=(-25, 25), bins=10000001)
+        Generates a sampler of random samples distributed with pdf 
+        using the inverse transform sampling method
+        Adapted from:
+        https://towardsdatascience.com/random-sampling-using-scipy-and-numpy-part-i-f3ce8c78812e
+        
+        
+        Args:
+            pdf (function(x)): probability density function to draw the
+              samples. Does not need to be normalized
+            range (tuple, optional): range for the random variable values. Defaults to (-25,25).
+            bins (int, optional): bins to build the discretized inverse
+            cumulative distribution function. Defaults to 10000001.
         
         Returns:
-            Plotly graphics object: animation of the simulation data
+            sampler_single, sampler_multi (tuple of functions): samplers that
+            provide random numbers distributed with the given pdf. 
+              sampler_single() returns one single value.
+              sampler_multi(n) return n random values.
     
-    center(t)
-        Default center for the harmonic potential
-        t |--> 0.0
-    
-    k(t)
-        Default stiffness for the harmonic potential
-        t |--> 1.0
-    
-    make_simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=<function k at 0x0000025AD892D3F0>, center=<function center at 0x0000025ADE341990>)
+    make_simulator(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=None, center=None, harmonic_potential=True, force=None, potential=None, initial_distribution=None)
         Makes a numba compiled njit langevin simulator of a brownian
-        particle in a harmonic potential with a given stiffness function k and center
+        particle in an external time variable potential or force 
         
         Args:
             tot_sims (int, optional): default total number of simulations. Defaults to 1000.
@@ -273,7 +301,7 @@ FUNCTIONS
             y_label (str, optional): label for y axis. Defaults to ''.
         
         Returns:
-            Plotly graphic object: the plot of the quantity
+            plotly.graph_objects.figure: the plot of the quantity
 
 
 

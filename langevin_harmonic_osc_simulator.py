@@ -1,10 +1,53 @@
-from statistics import harmonic_mean
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import numba as nb
 import cloudpickle
 import pickle
+from scipy.integrate import simps 
+
+def make_sampler(pdf,range=(-25,25), bins=10000001):
+  """Generates a sampler of random samples distributed with pdf 
+  using the inverse transform sampling method
+  Adapted from:
+  https://towardsdatascience.com/random-sampling-using-scipy-and-numpy-part-i-f3ce8c78812e
+
+
+  Args:
+      pdf (function(x)): probability density function to draw the
+        samples. Does not need to be normalized
+      range (tuple, optional): range for the random variable values. Defaults to (-25,25).
+      bins (int, optional): bins to build the discretized inverse
+      cumulative distribution function. Defaults to 10000001.
+
+  Returns:
+      sampler_single, sampler_multi (tuple of functions): samplers that
+      provide random numbers distributed with the given pdf. 
+        sampler_single() returns one single value.
+        sampler_multi(n) return n random values.
+  """
+
+  def normalisation(x):
+    return simps(pdf(x), x)
+  xs = np.linspace(*range, bins)
+  # define function to normalise our pdf to sum to 1 so it satisfies a distribution
+  norm_constant = normalisation(xs)
+  # create pdf
+  my_pdfs = pdf(xs) / norm_constant
+  # create cdf then ensure it is bounded at [0,1]
+  my_cdf = np.cumsum(my_pdfs)
+  my_cdf = my_cdf / my_cdf[-1]
+
+  def sampler_single():
+    rand = np.random.random_sample()
+    return np.interp(rand, my_cdf, xs)
+  def sampler_multi(size: int):
+    rand = np.random.random_sample(size)
+    return np.interp(rand, my_cdf, xs)
+
+  return sampler_single, sampler_multi
+
+############################################################################################
 
 def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1.0, snapshot_step=100,
                   k=None, center=None,
@@ -90,7 +133,8 @@ def make_simulator(tot_sims = 1000, dt = 0.001, tot_steps =10000, noise_scaler=1
         integral = integral*dx 
         return integral
     if initial_distribution == None:
-      raise ValueError('In general force mode the initial distribution has to be provided')
+      initial_distribution, _ = make_sampler(lambda x: np.exp(-potential(x,0)))
+      # raise ValueError('In general force mode the initial distribution has to be provided')
       # P(x) = exp(-U(x,0))/Z(0) :
       # To be implemented for non harmonic potential,
       # see inverse transform sampling
@@ -219,7 +263,7 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
       harmonic_potential: True if working with a harmonic potential
       potential: potential energy to use when harmonic_potential=False
   Returns:
-      Plotly graphics object: animation of the simulation data
+      plotly.graph_objects.figure: animation of the simulation data
   """
   if k == None:
     def k(t):
@@ -346,7 +390,7 @@ def plot_quantity(t_array, y_array,
       y_label (str, optional): label for y axis. Defaults to ''.
 
   Returns:
-      Plotly graphic object: the plot of the quantity
+      plotly.graph_objects.figure: the plot of the quantity
   """
   # make figure
   fig_dict = {
@@ -566,7 +610,7 @@ class Simulation:
         ValueError: quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
 
     Returns:
-        Plotly graphics object: animation of the PDF
+        plotly.graph_objects.figure: animation of the PDF
     """
     if quantity not in self.result_labels:
       raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
@@ -623,7 +667,7 @@ class Simulation:
         ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
 
     Returns:
-        Plotly graphics object: plot of the quantity
+        plotly.graph_objects.figure: plot of the quantity
     """
     if quantity not in self.result_labels:
       raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
@@ -649,7 +693,7 @@ class Simulation:
         ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
 
     Returns:
-        Plotly graphics object: plot of the quantity
+        plotly.graph_objects.figure: plot of the quantity
     """
     if quantity not in self.result_labels:
       raise ValueError(f"quantity {quantity} must be in {self.result_labels}")

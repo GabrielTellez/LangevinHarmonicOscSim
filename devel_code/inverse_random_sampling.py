@@ -16,9 +16,10 @@ def inverse_cdf(pdf,range=(-25,25), bins=10000001):
   # create cdf then ensure it is bounded at [0,1]
   my_cdf = np.cumsum(my_pdfs)
   my_cdf = my_cdf / my_cdf[-1]
-  # generate the inverse cdf
+  generate the inverse cdf
   func_ppf = interp1d(my_cdf, xs, fill_value='extrapolate')
   return func_ppf
+
 
 def f(x):
   return np.exp(-np.abs(x))

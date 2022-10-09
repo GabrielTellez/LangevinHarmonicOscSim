@@ -5,9 +5,8 @@ Python Library Documentation: module langevin_harmonic_osc_simulator
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>langevin_harmonic_osc_simulator</strong></big></big></font></td
-><td align=right valign=bottom></td>
-
-    <p></p>
+><td align=right valign=bottom
+>    <p></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -44,14 +43,14 @@ Python Library Documentation: module langevin_harmonic_osc_simulator
 <font color="#000000" face="helvetica, arial"><a name="Simulation">class <strong>Simulation</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Simulation">Simulation</a>(tot_sims,&nbsp;dt,&nbsp;tot_steps,&nbsp;noise_scaler,&nbsp;snapshot_step,&nbsp;k,&nbsp;center,&nbsp;results,&nbsp;name='')<br>
+<td colspan=2><tt><a href="#Simulation">Simulation</a>(tot_sims,&nbsp;dt,&nbsp;tot_steps,&nbsp;noise_scaler,&nbsp;snapshot_step,&nbsp;k,&nbsp;center,&nbsp;results,&nbsp;name='',&nbsp;harmonic_potential=True,&nbsp;force=None,&nbsp;potential=None)<br>
 &nbsp;<br>
 Stores&nbsp;simulation&nbsp;parameters&nbsp;and&nbsp;results.&nbsp;<br>
 Analyses&nbsp;the&nbsp;results:&nbsp;builds&nbsp;PDF&nbsp;of&nbsp;the&nbsp;simulation&nbsp;results&nbsp;(position,<br>
 work,&nbsp;etc..)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Simulation-__init__"><strong>__init__</strong></a>(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='')</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulation">Simulation</a>&nbsp;class&nbsp;with&nbsp;parameters&nbsp;and&nbsp;raw&nbsp;results<br>
+<dl><dt><a name="Simulation-__init__"><strong>__init__</strong></a>(self, tot_sims, dt, tot_steps, noise_scaler, snapshot_step, k, center, results, name='', harmonic_potential=True, force=None, potential=None)</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulation">Simulation</a>&nbsp;class&nbsp;with&nbsp;parameters&nbsp;and&nbsp;raw&nbsp;results<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int):&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.<br>
@@ -76,7 +75,12 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simulation&nbsp;sim&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;energy&nbsp;(ndarray&nbsp;of&nbsp;shape&nbsp;(tot_sims,&nbsp;tot_snapshots)):<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;energy[sim][ts]&nbsp;in&nbsp;simulation&nbsp;sim&nbsp;at&nbsp;snapshot&nbsp;ts&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;(string,&nbsp;optional):&nbsp;name&nbsp;of&nbsp;the&nbsp;simulation</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;(string,&nbsp;optional):&nbsp;name&nbsp;of&nbsp;the&nbsp;simulation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;harmonic_potential(boolean,&nbsp;optional):&nbsp;True&nbsp;if&nbsp;the&nbsp;potential&nbsp;is&nbsp;harmonic<br>
+&nbsp;&nbsp;&nbsp;&nbsp;force&nbsp;(float&nbsp;function(x,t),&nbsp;optional):&nbsp;force&nbsp;when&nbsp;the&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;not&nbsp;harmonic<br>
+&nbsp;&nbsp;&nbsp;&nbsp;potential&nbsp;(float&nbsp;function(x,t),&nbsp;optional):&nbsp;potential&nbsp;when&nbsp;the&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;not&nbsp;harmonic</tt></dd></dl>
 
 <dl><dt><a name="Simulation-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
 
@@ -96,7 +100,7 @@ Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;animation&nbsp;of&nbsp;the&nbsp;PDF</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;plotly.graph_objects.figure:&nbsp;animation&nbsp;of&nbsp;the&nbsp;PDF</tt></dd></dl>
 
 <dl><dt><a name="Simulation-build_averages"><strong>build_averages</strong></a>(self, quantity)</dt><dd><tt>Computes&nbsp;the&nbsp;average&nbsp;of&nbsp;a&nbsp;quantity.&nbsp;<br>
 The&nbsp;average&nbsp;at&nbsp;time&nbsp;t&nbsp;(with&nbsp;corresponding&nbsp;time_index&nbsp;of&nbsp;the&nbsp;snapshot)<br>
@@ -153,7 +157,7 @@ Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;plotly.graph_objects.figure:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
 
 <dl><dt><a name="Simulation-plot_variance"><strong>plot_variance</strong></a>(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)</dt><dd><tt>Plots&nbsp;the&nbsp;variance&nbsp;of&nbsp;quantity&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time<br>
 &nbsp;<br>
@@ -164,7 +168,7 @@ Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;plotly.graph_objects.figure:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
 
 <dl><dt><a name="Simulation-save"><strong>save</strong></a>(self, filename)</dt><dd><tt>Saves&nbsp;the&nbsp;simulation<br>
 &nbsp;<br>
@@ -190,7 +194,7 @@ Data and other attributes defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="Simulator">class <strong>Simulator</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Simulator">Simulator</a>(tot_sims=1000,&nbsp;dt=0.001,&nbsp;tot_steps=10000,&nbsp;noise_scaler=1.0,&nbsp;snapshot_step=100,&nbsp;k=&amp;lt;function&nbsp;k&nbsp;at&nbsp;0x0000025AD892D3F0&amp;gt;,&nbsp;center=&amp;lt;function&nbsp;center&nbsp;at&nbsp;0x0000025ADE341990&amp;gt;)<br>
+<td colspan=2><tt><a href="#Simulator">Simulator</a>(tot_sims=1000,&nbsp;dt=0.001,&nbsp;tot_steps=10000,&nbsp;noise_scaler=1.0,&nbsp;snapshot_step=100,&nbsp;k=None,&nbsp;center=None,&nbsp;harmonic_potential=True,&nbsp;force=None,&nbsp;potential=None,&nbsp;initial_distribution=None)<br>
 &nbsp;<br>
 <a href="#Simulator">Simulator</a>&nbsp;class&nbsp;for&nbsp;Langevin&nbsp;dynamics&nbsp;of&nbsp;a&nbsp;harmonic&nbsp;oscillator&nbsp;with<br>
 variable&nbsp;potential.&nbsp;Encapsulates&nbsp;the&nbsp;simulator,&nbsp;perform<br>
@@ -198,7 +202,7 @@ simulations,&nbsp;analyses&nbsp;them&nbsp;and&nbsp;store&nbsp;results<br>
 of&nbsp;simulation<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Simulator-__init__"><strong>__init__</strong></a>(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x0000025AD892D3F0&gt;, center=&lt;function center at 0x0000025ADE341990&gt;)</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulator">Simulator</a><br>
+<dl><dt><a name="Simulator-__init__"><strong>__init__</strong></a>(self, tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=None, center=None, harmonic_potential=True, force=None, potential=None, initial_distribution=None)</dt><dd><tt>Initializes&nbsp;the&nbsp;<a href="#Simulator">Simulator</a><br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int,&nbsp;optional):&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.&nbsp;Defaults&nbsp;to&nbsp;1000.<br>
@@ -207,8 +211,18 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;noise_scaler&nbsp;(float,&nbsp;optional):&nbsp;brownian&nbsp;noise&nbsp;scale&nbsp;k_B&nbsp;T.&nbsp;Defaults&nbsp;to&nbsp;1.0.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;snapshot_step&nbsp;(int,&nbsp;optional):&nbsp;save&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;simulation&nbsp;at<br>
 &nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;snapshot_step&nbsp;time.&nbsp;Defaults&nbsp;to&nbsp;100.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;<a href="#-k">k</a>(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;k(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;k(t)=1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;center(t)=0.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;harmonic_potential&nbsp;(boolean,&nbsp;optional):&nbsp;it&nbsp;True:&nbsp;the&nbsp;external&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;harmonic&nbsp;with&nbsp;stiffness&nbsp;k(t)&nbsp;and&nbsp;center(t).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;False&nbsp;the&nbsp;external&nbsp;force&nbsp;is&nbsp;given&nbsp;by&nbsp;the&nbsp;force&nbsp;argument&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;the&nbsp;external&nbsp;potential&nbsp;is&nbsp;given&nbsp;by&nbsp;potential&nbsp;argument<br>
+&nbsp;&nbsp;&nbsp;&nbsp;force&nbsp;(float&nbsp;function(x,t),&nbsp;optional):&nbsp;the&nbsp;external&nbsp;force<br>
+&nbsp;&nbsp;&nbsp;&nbsp;potential&nbsp;(float&nbsp;function(x,t),&nbsp;optional):&nbsp;the&nbsp;external&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;initial_distribution&nbsp;(float&nbsp;function(),&nbsp;optional):&nbsp;initial<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;condition&nbsp;for&nbsp;x(0).&nbsp;Default:&nbsp;for&nbsp;harmonic&nbsp;oscillator,&nbsp;sampled<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;equilibrium&nbsp;distribution&nbsp;exp(-k(0)(x-center(0)**2/2).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Have&nbsp;to&nbsp;be&nbsp;provided&nbsp;for&nbsp;general&nbsp;potential&nbsp;if&nbsp;harmonic_potential=False</tt></dd></dl>
 
 <dl><dt><a name="Simulator-analyse"><strong>analyse</strong></a>(self, sim_num=None)</dt><dd><tt>Performs&nbsp;the&nbsp;analysis&nbsp;of&nbsp;simulation&nbsp;number&nbsp;sim_num<br>
 &nbsp;<br>
@@ -242,7 +256,7 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-animate_simulation"><strong>animate_simulation</strong></a>(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=&lt;function k at 0x0000025AD892D3F0&gt;, center=&lt;function center at 0x0000025ADE341990&gt;)</dt><dd><tt>Plot&nbsp;and&nbsp;animates&nbsp;a&nbsp;simulation&nbsp;data&nbsp;results<br>
+<td width="100%"><dl><dt><a name="-animate_simulation"><strong>animate_simulation</strong></a>(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=300, x_label='x', y_label='P(x,t)', show_x_eq_distrib=True, k=None, center=None, harmonic_potential=True, potential=None)</dt><dd><tt>Plot&nbsp;and&nbsp;animates&nbsp;a&nbsp;simulation&nbsp;data&nbsp;results<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;times&nbsp;(list&nbsp;of&nbsp;float):&nbsp;list&nbsp;of&nbsp;times&nbsp;where&nbsp;snapshots&nbsp;where&nbsp;taken<br>
@@ -254,19 +268,34 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;x_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;xst&nbsp;in&nbsp;the&nbsp;plot.&nbsp;Defaults&nbsp;to&nbsp;'x'.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;the&nbsp;probability&nbsp;density&nbsp;of&nbsp;xst.&nbsp;Defaults&nbsp;to&nbsp;'P(x,t)'.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;show_x_eq_distrib&nbsp;(bool,&nbsp;optional):&nbsp;show&nbsp;the&nbsp;equilibrium<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;corresponding&nbsp;to&nbsp;a&nbsp;harmonic&nbsp;oscilator&nbsp;with&nbsp;<a href="#-center">center</a>(t)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;stiffness&nbsp;<a href="#-k">k</a>(t).&nbsp;Defaults&nbsp;to&nbsp;True.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distribution&nbsp;corresponding&nbsp;to&nbsp;a&nbsp;harmonic&nbsp;oscilator&nbsp;with&nbsp;center(t)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;stiffness&nbsp;k(t).&nbsp;Defaults&nbsp;to&nbsp;True.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;k(t)=1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;center(t)=0.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;harmonic_potential:&nbsp;True&nbsp;if&nbsp;working&nbsp;with&nbsp;a&nbsp;harmonic&nbsp;potential<br>
+&nbsp;&nbsp;&nbsp;&nbsp;potential:&nbsp;potential&nbsp;energy&nbsp;to&nbsp;use&nbsp;when&nbsp;harmonic_potential=False<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plotly.graph_objects.figure:&nbsp;animation&nbsp;of&nbsp;the&nbsp;simulation&nbsp;data</tt></dd></dl>
+ <dl><dt><a name="-make_sampler"><strong>make_sampler</strong></a>(pdf, range=(-25, 25), bins=10000001)</dt><dd><tt>Generates&nbsp;a&nbsp;sampler&nbsp;of&nbsp;random&nbsp;samples&nbsp;distributed&nbsp;with&nbsp;pdf&nbsp;<br>
+using&nbsp;the&nbsp;inverse&nbsp;transform&nbsp;sampling&nbsp;method<br>
+Adapted&nbsp;from:<br>
+<a href="https://towardsdatascience.com/random-sampling-using-scipy-and-numpy-part-i-f3ce8c78812e">https://towardsdatascience.com/random-sampling-using-scipy-and-numpy-part-i-f3ce8c78812e</a><br>
+&nbsp;<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pdf&nbsp;(function(x)):&nbsp;probability&nbsp;density&nbsp;function&nbsp;to&nbsp;draw&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;samples.&nbsp;Does&nbsp;not&nbsp;need&nbsp;to&nbsp;be&nbsp;normalized<br>
+&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;(tuple,&nbsp;optional):&nbsp;range&nbsp;for&nbsp;the&nbsp;random&nbsp;variable&nbsp;values.&nbsp;Defaults&nbsp;to&nbsp;(-25,25).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bins&nbsp;(int,&nbsp;optional):&nbsp;bins&nbsp;to&nbsp;build&nbsp;the&nbsp;discretized&nbsp;inverse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cumulative&nbsp;distribution&nbsp;function.&nbsp;Defaults&nbsp;to&nbsp;10000001.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphics&nbsp;<a href="builtins.html#object">object</a>:&nbsp;animation&nbsp;of&nbsp;the&nbsp;simulation&nbsp;data</tt></dd></dl>
- <dl><dt><a name="-center"><strong>center</strong></a>(t)</dt><dd><tt>Default&nbsp;center&nbsp;for&nbsp;the&nbsp;harmonic&nbsp;potential<br>
-t&nbsp;|--&gt;&nbsp;0.0</tt></dd></dl>
- <dl><dt><a name="-k"><strong>k</strong></a>(t)</dt><dd><tt>Default&nbsp;stiffness&nbsp;for&nbsp;the&nbsp;harmonic&nbsp;potential<br>
-t&nbsp;|--&gt;&nbsp;1.0</tt></dd></dl>
- <dl><dt><a name="-make_simulator"><strong>make_simulator</strong></a>(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=&lt;function k at 0x0000025AD892D3F0&gt;, center=&lt;function center at 0x0000025ADE341990&gt;)</dt><dd><tt>Makes&nbsp;a&nbsp;numba&nbsp;compiled&nbsp;njit&nbsp;langevin&nbsp;simulator&nbsp;of&nbsp;a&nbsp;brownian<br>
-particle&nbsp;in&nbsp;a&nbsp;harmonic&nbsp;potential&nbsp;with&nbsp;a&nbsp;given&nbsp;stiffness&nbsp;function&nbsp;k&nbsp;and&nbsp;center<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sampler_single,&nbsp;sampler_multi&nbsp;(tuple&nbsp;of&nbsp;functions):&nbsp;samplers&nbsp;that<br>
+&nbsp;&nbsp;&nbsp;&nbsp;provide&nbsp;random&nbsp;numbers&nbsp;distributed&nbsp;with&nbsp;the&nbsp;given&nbsp;pdf.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sampler_single()&nbsp;returns&nbsp;one&nbsp;single&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sampler_multi(n)&nbsp;return&nbsp;n&nbsp;random&nbsp;values.</tt></dd></dl>
+ <dl><dt><a name="-make_simulator"><strong>make_simulator</strong></a>(tot_sims=1000, dt=0.001, tot_steps=10000, noise_scaler=1.0, snapshot_step=100, k=None, center=None, harmonic_potential=True, force=None, potential=None, initial_distribution=None)</dt><dd><tt>Makes&nbsp;a&nbsp;numba&nbsp;compiled&nbsp;njit&nbsp;langevin&nbsp;simulator&nbsp;of&nbsp;a&nbsp;brownian<br>
+particle&nbsp;in&nbsp;an&nbsp;external&nbsp;time&nbsp;variable&nbsp;potential&nbsp;or&nbsp;force&nbsp;<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;tot_sims&nbsp;(int,&nbsp;optional):&nbsp;default&nbsp;total&nbsp;number&nbsp;of&nbsp;simulations.&nbsp;Defaults&nbsp;to&nbsp;1000.<br>
@@ -275,8 +304,8 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;noise_scaler&nbsp;(float,&nbsp;optional):&nbsp;brownian&nbsp;noise&nbsp;scale&nbsp;k_B&nbsp;T.&nbsp;Defaults&nbsp;to&nbsp;1.0.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;snapshot_step&nbsp;(int,&nbsp;optional):&nbsp;save&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;simulation&nbsp;at<br>
 &nbsp;&nbsp;&nbsp;&nbsp;each&nbsp;snapshot_step&nbsp;time.&nbsp;Defaults&nbsp;to&nbsp;100.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;<a href="#-k">k</a>(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-k">k</a>(t)=1.0.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;<a href="#-center">center</a>(t)=0.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;stiffness&nbsp;function&nbsp;k(t)&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;k(t)=1.0.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;center&nbsp;(float&nbsp;function,&nbsp;optional):&nbsp;center&nbsp;function&nbsp;of&nbsp;the&nbsp;potential.&nbsp;Defaults&nbsp;to&nbsp;center(t)=0.0.<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;njitted&nbsp;function:&nbsp;numba&nbsp;compiled&nbsp;function&nbsp;that&nbsp;performs&nbsp;simulation</tt></dd></dl>
@@ -291,5 +320,5 @@ Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;y&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;''.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Plotly&nbsp;graphic&nbsp;<a href="builtins.html#object">object</a>:&nbsp;the&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;plotly.graph_objects.figure:&nbsp;the&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
 </td></tr></table>
