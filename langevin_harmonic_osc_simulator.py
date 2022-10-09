@@ -282,7 +282,6 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
   num_points = 1000
   xx=np.linspace(*x_range, num_points)
   histos=[np.histogram(xst[:,ti], density=True, range=x_range, bins=bins) for ti in range(0,len(times))]
-  # To do: plot general PDF exp(-U(x,t))
   if harmonic_potential:
     b=[np.exp(-0.5*k(t)*(xx-center(t))**2)/np.sqrt(2*np.pi/k(t)) for t in times]
   else:
