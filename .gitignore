@@ -9,5 +9,6 @@ seminario_termo_estocastica*.ipynb
 __pycache__/
 .vscode/
 *.pickle
-
+tmp/
+bk/
 
