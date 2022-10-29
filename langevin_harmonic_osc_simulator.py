@@ -632,8 +632,9 @@ class Simulation:
     """
     with open(filename, 'wb') as f:
       cloudpickle.dump(self, f, pickle.DEFAULT_PROTOCOL)
-
-  def load(filename):
+  
+  @classmethod
+  def load(cls, filename):
     """Loads a simulation from file
 
     Args:
@@ -644,7 +645,10 @@ class Simulation:
     """
     with open(filename, 'rb') as f:
       _sim = pickle.load(f)
-    return _sim
+    if isinstance(_sim, cls):
+      return _sim
+    else:
+      raise TypeError(f'File "{filename}" does not contain a simulation.')
 
   def analyse(self):
     """Builds all histogram, PDF, averages and variances"""

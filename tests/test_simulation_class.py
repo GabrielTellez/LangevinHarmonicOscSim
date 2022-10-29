@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import os
 import plotly.graph_objects as go
+import pickle 
 
 @pytest.fixture
 def dummy_sim():
@@ -373,6 +374,20 @@ def test_save_load_simulation(dummy_sim):
   compare_sims_results(sim, new_sim)
   compare_sims_k_center(sim, new_sim)
   os.remove(filename)
+
+def test_load_wrong_simulation():
+  """Tests that loading a wrong file for a simulation raises an error"""
+
+  filename="dummy_sim_test_save.pickle"
+  wrong_data = 10
+  with open(filename, 'wb') as f:
+      pickle.dump(wrong_data, f, pickle.DEFAULT_PROTOCOL)
+  with pytest.raises(TypeError):
+    # This should fail 
+    new_sim = Simulation.load(filename)
+  os.remove(filename)
+
+
 
 def test_name_simulation(dummy_sim):
   """Test if the simulation has a name"""

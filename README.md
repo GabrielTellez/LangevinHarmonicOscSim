@@ -123,7 +123,7 @@ Jupyter notebook illustration the use of the classes Simulator and Simulation
 
 ## tests/
 
-Tests for use with pytest for the simulator ans simulation classes
+Tests for use with pytest for the simulator and simulation classes
 
 ## scripts/
 
