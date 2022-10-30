@@ -5,6 +5,7 @@ import numba as nb
 import cloudpickle
 import pickle
 from scipy.integrate import simps 
+from scipy.interpolate import interp2d
 
 def make_sampler(pdf,range=(-25,25), bins=10000001):
   """Generates a sampler of random samples distributed with pdf 
@@ -376,8 +377,8 @@ def animate_simulation(times, xst, x_range=[-3.0, 6.0], y_range=[0, 1.5], bins=3
 ################################################################################
 
 def plot_quantity(t_array, y_array,
-                  t_range=None, y_range=None,
-                  t_label ='t', y_label=''):
+                  t_range = None, y_range = None,
+                  t_label ='t', y_label = '', scatter_label = None):
   """Plots y_array as function of t_array
 
   Args:
@@ -391,7 +392,9 @@ def plot_quantity(t_array, y_array,
   Returns:
       plotly.graph_objects.figure: the plot of the quantity
   """
-  # make figure
+  if scatter_label == None:
+    scatter_label = y_label
+
   fig_dict = {
     "data": [],
     "layout": {}
@@ -411,7 +414,7 @@ def plot_quantity(t_array, y_array,
                         xaxis_title=t_label,
                         yaxis_title=y_label )
   fig_dict["data"].append(
-    go.Scatter(x=t_array, y=y_array, name=y_label)
+    go.Scatter(x=t_array, y=y_array, name=scatter_label)
   ) 
   fig=go.Figure(fig_dict)
   return fig
@@ -537,6 +540,16 @@ class Simulation:
         index_x=0
       return self.histogram[quantity][ti, 0][index_x]
     self.pdf[quantity] = pdf    
+
+    # Trying interp2d but this does not work because of different
+    # ranges in x for different times t
+    
+    # t = self.results['times']
+    # Using initial positions for all t does not work
+    # x = self.histogram[quantity][0, 1][:-1]
+    # This has the wrong shape
+    # pdf_values = self.histogram[quantity][:, 0]
+    # pdf = interp2d(x, t, pdf_values)
 
   def build_averages(self, quantity):
     """Computes the average of a quantity. 
@@ -665,6 +678,12 @@ class Simulation:
 
     Args:
         quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+        t_array (np.array): time axis array
+        y_array (np.array): quantity to plot array
+        t_range (list, optional): t range. Defaults to Autoscale.
+        y_range (list, optional): y range. Defaults to Autoscale.
+        t_label (str, optional): label for t axis. Defaults to 't'.
+        y_label (str, optional): label for y axis. Defaults to ''.
 
     Raises:
         ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
@@ -677,11 +696,11 @@ class Simulation:
     if quantity not in self.averages:
       self.build_averages(quantity)
     if y_label == None:
-      y_label = quantity
+      y_label = f'<{quantity}>'
     # make figure
     fig = plot_quantity(self.results['times'], self.averages[quantity],
                   t_range=t_range, y_range=y_range,
-                  t_label=t_range, y_label=y_label)
+                  t_label=t_label, y_label=y_label)
     return fig
 
   def plot_variance(self, quantity, 
@@ -691,6 +710,12 @@ class Simulation:
 
     Args:
         quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+        t_array (np.array): time axis array
+        y_array (np.array): quantity to plot array
+        t_range (list, optional): t range. Defaults to Autoscale.
+        y_range (list, optional): y range. Defaults to Autoscale.
+        t_label (str, optional): label for t axis. Defaults to 't'.
+        y_label (str, optional): label for y axis. Defaults to ''.
 
     Raises:
         ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
@@ -707,8 +732,58 @@ class Simulation:
     # make figure
     fig = plot_quantity(self.results['times'], self.variances[quantity],
                   t_range=t_range, y_range=y_range,
-                  t_label=t_range, y_label=y_label)
+                  t_label=t_label, y_label=y_label)
     return fig
+
+  def plot_sim(self, quantity: str, sim_list, sim_labels = None, 
+                  t_range=None, y_range=None,
+                  t_label ='t', y_label=None): 
+    """Plots quantity as a function of time for simulations listed in sim_list
+
+    Args:
+        quantity (str): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+        sim_list (list of int): list of the simulation numbers to plot.
+        sim_labels (list of str, optional): list of labels for each
+          trace in the plot. Defaults to None.
+        t_array (np.array): time axis array
+        y_array (np.array): quantity to plot array
+        t_range (list, optional): t range. Defaults to Autoscale.
+        y_range (list, optional): y range. Defaults to Autoscale.
+        t_label (str, optional): label for t axis. Defaults to 't'.
+        y_label (str, optional): label for y axis. Defaults to ''.
+
+    Raises:
+        ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+
+    Returns:
+        plotly.graph_objects.figure: plot of the quantity
+    """
+    if quantity not in self.result_labels:
+      raise ValueError(f"quantity {quantity} must be in {self.result_labels}")
+    if y_label == None:
+      y_label = quantity
+    # Check if the list of simulation to plot is in range
+    if any(num not in range(self.tot_sims) for num in sim_list):
+      raise ValueError(f"Cannot plot a simulation {sim_list=} out of range {range(self.tot_sims)}")
+    if sim_labels == None:
+      # Use simulation numbers as labels for each scatter 
+      sim_labels = [ l for l in map(str, sim_list) ]
+    if len(sim_labels) != len(sim_list):
+      raise ValueError(f'List of simulations {sim_list=} does not match list of labels {sim_labels=}')
+    # print(f"{sim_list=}, {sim_labels=}")
+    t = self.results['times']
+    xs = self.results[quantity]
+    # Initialize plot with the first trace
+    fig = plot_quantity(t, xs[sim_list[0]],
+                        t_range=t_range, y_range=y_range,
+                        t_label=t_label, y_label=y_label,
+                        scatter_label=sim_labels[0])
+    # Add the rest of traces
+    for (k,i) in enumerate(sim_list[1:], 1):
+      # print(f"{i=}, {k=}, {sim_labels[k]=}")
+      fig.add_trace(go.Scatter(x=t, y=xs[i], name=sim_labels[k]))
+    return fig
+    
 
 ##################################################################################
 

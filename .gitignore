@@ -12,4 +12,5 @@ __pycache__/
 tmp/
 bk/
 test.ipynb
+.coverage
 

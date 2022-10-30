@@ -456,3 +456,21 @@ def test_plot_variance(dummy_sim, quantity):
   ) = dummy_sim 
   plot = sim.plot_variance(quantity)
   assert(isinstance(plot, go.Figure))
+
+@pytest.mark.parametrize("quantity",
+                        ["x", "power", "work", "heat", "delta_U", "energy"])
+def test_plot_sim(dummy_sim, quantity):
+  """Test if a plot of a quantity as function of time is created
+
+  Args:
+      dummy_sim (tuple): simulation data and class
+      quantity (string): quantity to plot the variance
+  """
+  (
+    tot_sims, dt, tot_steps, noise_scaler, snapshot_step,
+    k, center, results,
+    sim
+  ) = dummy_sim 
+  sim_list = [i for i in range(sim.tot_sims)]
+  plot = sim.plot_sim(quantity, sim_list)
+  assert(isinstance(plot, go.Figure))
