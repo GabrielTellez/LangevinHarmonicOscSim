@@ -6,7 +6,7 @@ Python Library Documentation: module langevin_harmonic_osc_simulator
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>langevin_harmonic_osc_simulator</strong></big></big></font></td
 ><td align=right valign=bottom
->    <p></p>
+> <p></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -140,18 +140,36 @@ Args:<br>
 Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]</tt></dd></dl>
 
-<dl><dt><a name="Simulation-load"><strong>load</strong></a>(filename)</dt><dd><tt>Loads&nbsp;a&nbsp;simulation&nbsp;from&nbsp;file<br>
-&nbsp;<br>
-Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(string):&nbsp;filename&nbsp;of&nbsp;the&nbsp;simulation&nbsp;to&nbsp;load&nbsp;the<br>
-&nbsp;<br>
-Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Simulation">Simulation</a>:&nbsp;the&nbsp;loaded&nbsp;simulation</tt></dd></dl>
-
 <dl><dt><a name="Simulation-plot_average"><strong>plot_average</strong></a>(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)</dt><dd><tt>Plots&nbsp;&lt;quantity&gt;&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;plot.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_array&nbsp;(np.array):&nbsp;time&nbsp;axis&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_array&nbsp;(np.array):&nbsp;quantity&nbsp;to&nbsp;plot&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_range&nbsp;(list,&nbsp;optional):&nbsp;t&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_range&nbsp;(list,&nbsp;optional):&nbsp;y&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;t&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;'t'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;y&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;''.<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plotly.graph_objects.figure:&nbsp;plot&nbsp;of&nbsp;the&nbsp;quantity</tt></dd></dl>
+
+<dl><dt><a name="Simulation-plot_sim"><strong>plot_sim</strong></a>(self, quantity: str, sim_list, sim_labels=None, t_range=None, y_range=None, t_label='t', y_label=None)</dt><dd><tt>Plots&nbsp;quantity&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;time&nbsp;for&nbsp;simulations&nbsp;listed&nbsp;in&nbsp;sim_list<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(str):&nbsp;quantity&nbsp;to&nbsp;plot.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sim_list&nbsp;(list&nbsp;of&nbsp;int):&nbsp;list&nbsp;of&nbsp;the&nbsp;simulation&nbsp;numbers&nbsp;to&nbsp;plot.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sim_labels&nbsp;(list&nbsp;of&nbsp;str,&nbsp;optional):&nbsp;list&nbsp;of&nbsp;labels&nbsp;for&nbsp;each<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;in&nbsp;the&nbsp;plot.&nbsp;Defaults&nbsp;to&nbsp;None.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_array&nbsp;(np.array):&nbsp;time&nbsp;axis&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_array&nbsp;(np.array):&nbsp;quantity&nbsp;to&nbsp;plot&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_range&nbsp;(list,&nbsp;optional):&nbsp;t&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_range&nbsp;(list,&nbsp;optional):&nbsp;y&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;t&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;'t'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;y&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;''.<br>
 &nbsp;<br>
 Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
@@ -163,6 +181,12 @@ Returns:<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;quantity&nbsp;(string):&nbsp;quantity&nbsp;to&nbsp;plot.&nbsp;Should&nbsp;be&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_array&nbsp;(np.array):&nbsp;time&nbsp;axis&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_array&nbsp;(np.array):&nbsp;quantity&nbsp;to&nbsp;plot&nbsp;array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_range&nbsp;(list,&nbsp;optional):&nbsp;t&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_range&nbsp;(list,&nbsp;optional):&nbsp;y&nbsp;range.&nbsp;Defaults&nbsp;to&nbsp;Autoscale.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;t_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;t&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;'t'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y_label&nbsp;(str,&nbsp;optional):&nbsp;label&nbsp;for&nbsp;y&nbsp;axis.&nbsp;Defaults&nbsp;to&nbsp;''.<br>
 &nbsp;<br>
 Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;if&nbsp;quantity&nbsp;is&nbsp;not&nbsp;in&nbsp;["x",&nbsp;"power",&nbsp;"work",&nbsp;"heat",&nbsp;"delta_U",&nbsp;"energy"]<br>
@@ -174,6 +198,16 @@ Returns:<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(string):&nbsp;filename&nbsp;where&nbsp;the&nbsp;simulation&nbsp;is&nbsp;saved</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="Simulation-load"><strong>load</strong></a>(filename)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Loads&nbsp;a&nbsp;simulation&nbsp;from&nbsp;file<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(string):&nbsp;filename&nbsp;of&nbsp;the&nbsp;simulation&nbsp;to&nbsp;load<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Simulation">Simulation</a>:&nbsp;the&nbsp;loaded&nbsp;simulation</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -309,7 +343,7 @@ Args:<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;njitted&nbsp;function:&nbsp;numba&nbsp;compiled&nbsp;function&nbsp;that&nbsp;performs&nbsp;simulation</tt></dd></dl>
- <dl><dt><a name="-plot_quantity"><strong>plot_quantity</strong></a>(t_array, y_array, t_range=None, y_range=None, t_label='t', y_label='')</dt><dd><tt>Plots&nbsp;y_array&nbsp;as&nbsp;function&nbsp;of&nbsp;t_array<br>
+ <dl><dt><a name="-plot_quantity"><strong>plot_quantity</strong></a>(t_array, y_array, t_range=None, y_range=None, t_label='t', y_label='', scatter_label=None)</dt><dd><tt>Plots&nbsp;y_array&nbsp;as&nbsp;function&nbsp;of&nbsp;t_array<br>
 &nbsp;<br>
 Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;t_array&nbsp;(np.array):&nbsp;time&nbsp;axis&nbsp;array&nbsp;of<br>

@@ -115,20 +115,38 @@ CLASSES
      |      Raises:
      |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
      |  
-     |  load(filename)
-     |      Loads a simulation from file
-     |      
-     |      Args:
-     |          filename (string): filename of the simulation to load the
-     |      
-     |      Returns:
-     |          Simulation: the loaded simulation
-     |  
      |  plot_average(self, quantity, t_range=None, y_range=None, t_label='t', y_label=None)
      |      Plots <quantity> as a function of time
      |      
      |      Args:
      |          quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |          t_array (np.array): time axis array
+     |          y_array (np.array): quantity to plot array
+     |          t_range (list, optional): t range. Defaults to Autoscale.
+     |          y_range (list, optional): y range. Defaults to Autoscale.
+     |          t_label (str, optional): label for t axis. Defaults to 't'.
+     |          y_label (str, optional): label for y axis. Defaults to ''.
+     |      
+     |      Raises:
+     |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |      
+     |      Returns:
+     |          plotly.graph_objects.figure: plot of the quantity
+     |  
+     |  plot_sim(self, quantity: str, sim_list, sim_labels=None, t_range=None, y_range=None, t_label='t', y_label=None)
+     |      Plots quantity as a function of time for simulations listed in sim_list
+     |      
+     |      Args:
+     |          quantity (str): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |          sim_list (list of int): list of the simulation numbers to plot.
+     |          sim_labels (list of str, optional): list of labels for each
+     |            trace in the plot. Defaults to None.
+     |          t_array (np.array): time axis array
+     |          y_array (np.array): quantity to plot array
+     |          t_range (list, optional): t range. Defaults to Autoscale.
+     |          y_range (list, optional): y range. Defaults to Autoscale.
+     |          t_label (str, optional): label for t axis. Defaults to 't'.
+     |          y_label (str, optional): label for y axis. Defaults to ''.
      |      
      |      Raises:
      |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
@@ -141,6 +159,12 @@ CLASSES
      |      
      |      Args:
      |          quantity (string): quantity to plot. Should be in ["x", "power", "work", "heat", "delta_U", "energy"]
+     |          t_array (np.array): time axis array
+     |          y_array (np.array): quantity to plot array
+     |          t_range (list, optional): t range. Defaults to Autoscale.
+     |          y_range (list, optional): y range. Defaults to Autoscale.
+     |          t_label (str, optional): label for t axis. Defaults to 't'.
+     |          y_label (str, optional): label for y axis. Defaults to ''.
      |      
      |      Raises:
      |          ValueError: if quantity is not in ["x", "power", "work", "heat", "delta_U", "energy"]
@@ -153,6 +177,18 @@ CLASSES
      |      
      |      Args:
      |          filename (string): filename where the simulation is saved
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  load(filename) from builtins.type
+     |      Loads a simulation from file
+     |      
+     |      Args:
+     |          filename (string): filename of the simulation to load
+     |      
+     |      Returns:
+     |          Simulation: the loaded simulation
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
@@ -289,7 +325,7 @@ FUNCTIONS
         Returns:
             njitted function: numba compiled function that performs simulation
     
-    plot_quantity(t_array, y_array, t_range=None, y_range=None, t_label='t', y_label='')
+    plot_quantity(t_array, y_array, t_range=None, y_range=None, t_label='t', y_label='', scatter_label=None)
         Plots y_array as function of t_array
         
         Args:

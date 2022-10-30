@@ -651,7 +651,7 @@ class Simulation:
     """Loads a simulation from file
 
     Args:
-        filename (string): filename of the simulation to load the
+        filename (string): filename of the simulation to load
 
     Returns:
         Simulation: the loaded simulation
