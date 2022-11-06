@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 from ..langevin_harmonic_osc_simulator import Simulator
 import numpy as np
 import pytest

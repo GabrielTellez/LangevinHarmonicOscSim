@@ -13,4 +13,5 @@ tmp/
 bk/
 test.ipynb
 .coverage
+.pytest_cache
 
